@@ -1,0 +1,273 @@
+---
+title: "Precipitation Readings"
+output: html_notebook
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+library(sf)
+```
+
+# 1. Imports
+
+Import all precipitation readings from the `Precipitazioni_dal_01062023_al_01062024.csv` dataset:
+
+```{r}
+precipitation_readings <- read.csv(
+    "arpa_dataset/Precipitazioni_dal_01062023_al_01062024.csv",
+    header = TRUE,
+    strip.white = TRUE,
+    na.strings = c("-999")
+)
+precipitation_readings
+```
+
+This won't be fun, since the current meteo dataset contains readings from all types of sensors, which means I need to extract only the necessary ones. Let's first import the dataset `Dati_sensori_meteo_01012024_01062024.csv`:
+
+```{r}
+current_data <- read.csv(
+    "arpa_dataset/Dati_sensori_meteo_01012024_01062024.csv",
+    header = TRUE,
+    strip.white = TRUE,
+    na.strings = c("-999")
+)
+```
+
+I also need the elaborated station sensors data:
+
+```{r}
+sensors <- read.csv(
+    "processed_dataset/Stazioni_Idro_Nivo_Meteorologiche.csv",
+    header = TRUE,
+    strip.white = TRUE
+)
+```
+
+# 2. Preprocessing
+
+Extract the precipitation sensors:
+
+```{r}
+precipitation_sensor_ids <- sensors |>
+    filter(Tipologia == "Precipitazione") |>
+    pull(IdSensore) |>
+    unique()
+precipitation_sensor_ids
+```
+
+Filter out only the precipitation sensors preselected:
+
+```{r}
+precipitation_readings <- precipitation_readings |>
+    filter(idSensore %in% precipitation_sensor_ids)
+precipitation_readings
+```
+
+# 2.1 Data cleaning
+
+First of all, let's rename the attribute `idSensore` to `IdSensore`, essential for later when merging:
+
+```{r}
+precipitation_readings <- precipitation_readings |>
+    rename(IdSensore = idSensore)
+```
+
+Let's see how many of the readings are invalid (NA):
+
+```{r}
+precipitation_readings |>
+    filter(Stato == "NA") |>
+    count()
+```
+
+Very few! Around 30K compared to 8M.
+Let's try to visualize only the valid ones.
+
+```{r}
+precipitation_readings |> filter(Stato == "VA")
+```
+
+I need to convert of dates of collection from character to usable date times:
+
+```{r}
+precipitation_readings <- precipitation_readings |>
+    mutate(Data = dmy_hms(Data))
+```
+
+Now let's try to visualize the number of valid readings by each sensor, and the starting date and ending date of their readings:
+
+```{r}
+precipitation_readings |>
+    group_by(IdSensore) |>
+    filter(Stato == "VA") |>
+    summarise(
+        min_date = min(Data),
+        max_date = max(Data),
+        valid_readings = n()
+    )
+    
+```
+
+## 2.2 Current Data readings
+
+Filter out only the precipitation sensor current readings:
+
+```{r}
+precipitation_current <- current_data |>
+    filter(IdSensore %in% precipitation_sensor_ids)
+precipitation_current
+```
+
+Convert the datetimes into usable objects, and visualize the number of valid readings by each sensor, and the starting date and ending date of their readings:
+
+```{r}
+precipitation_current <- precipitation_current |>
+    mutate(Data = dmy_hms(Data))
+```
+
+```{r}
+precipitation_current |>
+    group_by(IdSensore) |>
+    filter(Stato == "VA") |>
+    summarise(
+        min_date = min(Data),
+        max_date = max(Data),
+        valid_readings = n()
+    )
+    
+```
+
+## 2.3 Merging historic with current
+
+Now let's merge both historic and current precipitation readings datasets:
+
+```{r}
+precipitation_merged <- bind_rows(precipitation_readings, precipitation_current)
+precipitation_merged
+```
+
+We need to remove all duplicate instances. Remember that an instance is identified by the reporting sensor, and the time and date of collection.
+
+```{r}
+precipitation_merged <- precipitation_merged |>
+    distinct(IdSensore, Data, .keep_all = TRUE)
+precipitation_merged
+```
+
+## 2.4 Checking for outlier readings
+
+We'd better check for readings that are way off the others, most likely due to sensor malfunctions. Let's plot them first by month:
+
+```{r}
+precipitation_merged |>
+    filter(Stato == "VA") |>
+    mutate(
+        Month = month(Data, label = TRUE)
+    ) |>
+    ggplot(
+        aes(x = Month, y = Valore)
+    ) +
+    geom_hline(
+        yintercept = 0, 
+        linetype = "dashed", 
+        color = "#F26D6D"
+    ) +
+    geom_boxplot(
+        aes(fill = Month)
+    ) +
+    labs(
+        x = element_blank(), y = "Precipitation (mm)"
+    ) +
+    scale_fill_brewer(palette = "Blues") +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+```
+
+Then, by altitude range:
+
+```{r}
+precipitation_merged_altitude <- left_join(
+    precipitation_merged,
+    sensors |> filter(IdSensore %in% precipitation_sensor_ids),
+    by = "IdSensore"
+)
+
+precipitation_merged_altitude$AltitudeRange <- cut(
+    precipitation_merged_altitude$Quota,
+    breaks = seq(0, 3200, by = 800),
+    labels = c("0-800m", "800-1600m", "1600-2400m", "2400-3200m")
+)
+```
+
+```{r}
+precipitation_merged_altitude |>
+    filter(Stato == "VA") |>
+    ggplot(
+        aes(x = AltitudeRange, y = Valore)
+    ) +
+    geom_hline(
+        yintercept = 0, 
+        linetype = "dashed", 
+        color = "#F26D6D"
+    ) +
+    geom_boxplot(
+        aes(fill = AltitudeRange)
+    ) +
+    labs(
+        x = element_blank(), y = "Precipitation (mm)"
+    ) +
+    scale_fill_brewer(palette = "Blues") +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+```
+
+A value of more than 60mm in a single hour is really high, but not impossible. Let's just assume it's valid.
+
+## 2.5 Computing daily cumulative per sensor
+
+Let's now compute the daily average for each sensor. First, extract the date from `Data`:
+
+```{r}
+precipitation_daily <- precipitation_merged |>
+    mutate(Data = floor_date(Data, unit = "day"))
+precipitation_daily
+```
+
+Then compute the average readings for each sensor within each day:
+
+```{r}
+precipitation_daily <- precipitation_daily |>
+    group_by(IdSensore, Data) |>
+    summarise(
+        Valore = if (all(is.na(Valore))) -999 else sum(Valore, na.rm = TRUE),
+        .groups = "drop"
+    ) |>
+    mutate(Stato = ifelse(Valore == -999, "NA", "VA"))
+precipitation_daily
+```
+
+## 2.6 Quick inspection and saving
+
+Finally, save the computed daily cumulative precipitation in a separate .csv file:
+
+```{r}
+write.csv(
+    precipitation_daily,
+    file = "processed_dataset/Precipitazioni_dal_01062023_al_01062024.csv",
+    sep = ",",
+    quote = FALSE,
+    row.names = FALSE
+)
+```

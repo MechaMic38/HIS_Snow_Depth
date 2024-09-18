@@ -1,0 +1,309 @@
+---
+title: "Temperature Readings"
+output: html_notebook
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+library(sf)
+```
+
+# Imports
+
+Import all temperature readings from the `Radiazione_Globale_dal_01062023_al_01062024.csv` dataset:
+
+```{r}
+temp_readings <- read.csv(
+    "arpa_dataset/Temperatura_dal_01062023_al_01062024.csv",
+    header = TRUE,
+    strip.white = TRUE,
+    na.strings = c("-999")
+)
+temp_readings
+```
+
+This won't be fun, since the current meteo dataset contains readings from all types of sensors, which means I need to extract only the necessary ones. Let's first import the dataset `Dati_sensori_meteo_01012024_01062024.csv`:
+
+```{r}
+current_data <- read.csv(
+    "arpa_dataset/Dati_sensori_meteo_01012024_01062024.csv",
+    header = TRUE,
+    strip.white = TRUE,
+    na.strings = c("-999")
+)
+```
+
+I also need the elaborated station sensors data:
+
+```{r}
+sensors <- read.csv(
+    "processed_dataset/Stazioni_Idro_Nivo_Meteorologiche.csv",
+    header = TRUE,
+    strip.white = TRUE
+)
+```
+
+# 2. Preprocessing
+
+Extract the temperature sensors:
+
+```{r}
+temp_sensor_ids <- sensors |>
+    filter(Tipologia == "Temperatura") |>
+    pull(IdSensore) |>
+    unique()
+temp_sensor_ids
+```
+
+Filter out only the temperature sensors preselected:
+
+```{r}
+temp_readings <- temp_readings |>
+    filter(idSensore %in% temp_sensor_ids)
+temp_readings
+```
+
+# 2.1 Data Cleaning
+
+First of all, let's rename the attribute `idSensore` to `IdSensore`, essential for later when merging:
+
+```{r}
+temp_readings <- temp_readings |>
+    rename(IdSensore = idSensore)
+```
+
+Let's see how many of the readings are invalid (NA):
+
+```{r}
+temp_readings |>
+    filter(Stato == "NA") |>
+    count()
+```
+
+Very few! Around 22.5K compared to 5.5M.
+Let's try to visualize only the valid ones.
+
+```{r}
+temp_readings |> filter(Stato == "VA")
+```
+
+I need to convert of dates of collection from character to usable date times:
+
+```{r}
+temp_readings <- temp_readings |>
+    mutate(Data = dmy_hms(Data))
+```
+
+Now let's try to visualize the number of valid readings by each sensor, and the starting date and ending date of their readings:
+
+```{r}
+temp_readings |>
+    group_by(IdSensore) |>
+    filter(Stato == "VA") |>
+    summarise(
+        min_date = min(Data),
+        max_date = max(Data),
+        valid_readings = n()
+    )
+    
+```
+
+## 2.2 Current Data readings
+
+Filter out only the temperature sensor current readings:
+
+```{r}
+temp_current <- current_data |>
+    filter(IdSensore %in% temp_sensor_ids)
+temp_current
+```
+
+Let's repeat the same process as before, convert the datetimes into usable objects, and visualize the number of valid readings by each sensor, and the starting date and ending date of their readings:
+
+```{r}
+temp_current <- temp_current |>
+    mutate(Data = dmy_hms(Data))
+```
+
+```{r}
+temp_current |>
+    group_by(IdSensore) |>
+    filter(Stato == "VA") |>
+    summarise(
+        min_date = min(Data),
+        max_date = max(Data),
+        valid_readings = n()
+    )
+    
+```
+
+## 2.3 Merging historic with current
+
+Now let's merge both historic and current temperature readings datasets:
+
+```{r}
+temp_merged <- bind_rows(temp_readings, temp_current)
+temp_merged
+```
+
+We need to remove all duplicate instances. Remember that an instance is identified by the reporting sensor, and the time and date of collection.
+
+```{r}
+temp_merged <- temp_merged |>
+    distinct(IdSensore, Data, .keep_all = TRUE)
+temp_merged
+```
+
+## 2.4 Checking for outlier readings
+
+We'd better check for readings that are way off the others, most likely due to sensor malfunctions. Let's plot them first by month:
+
+```{r}
+temp_merged |>
+    filter(Stato == "VA") |>
+    mutate(
+        Month = month(Data, label = TRUE)
+    ) |>
+    ggplot(
+        aes(x = Month, y = Valore)
+    ) +
+    geom_hline(
+        yintercept = 0, 
+        linetype = "dashed", 
+        color = "#F26D6D"
+    ) +
+    geom_boxplot(
+        aes(fill = Month)
+    ) +
+    labs(
+        x = element_blank(), y = "Temperature (°C)"
+    ) +
+    scale_fill_brewer(palette = "Reds") +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+```
+
+Then, by altitude range:
+
+```{r}
+temp_merged_altitude <- left_join(
+    temp_merged,
+    sensors |> filter(IdSensore %in% temp_sensor_ids),
+    by = "IdSensore"
+)
+
+temp_merged_altitude$AltitudeRange <- cut(
+    temp_merged_altitude$Quota,
+    breaks = seq(0, 3200, by = 800),
+    labels = c("0-800m", "800-1600m", "1600-2400m", "2400-3200m")
+)
+```
+
+```{r}
+temp_altitude <- temp_merged_altitude |>
+    filter(Stato == "VA") |>
+    ggplot(
+        aes(x = AltitudeRange, y = Valore)
+    ) +
+    geom_hline(
+        yintercept = 0, 
+        linetype = "dashed", 
+        color = "#F26D6D"
+    ) +
+    geom_boxplot(
+        aes(fill = AltitudeRange)
+    ) +
+    labs(
+        x = element_blank(), y = "Temperature (°C)"
+    ) +
+    scale_fill_brewer(palette = "Reds") +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+temp_altitude
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/temp_altitude_anomalies.jpg",
+    plot = temp_altitude,
+    width = 20,
+    height = 10,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+According to the available data:
+
+- 0-800m: temperatures are very unlikely to be below -10°C
+- 800-1600m: temperatures are very unlikely to be below -15°C
+- 1600-2400m: temperatures are very unlikely to be below -22°C
+- 2400-3200m: temperatures are very unlikely to be below -25°C
+
+```{r}
+temp_merged_altitude <- temp_merged_altitude |>
+    mutate(
+        Valore = case_when(
+            Quota < 800 & Valore < -10 ~ NA,
+            Quota >= 800 & Quota < 1600 & Valore < -15 ~ NA,
+            Quota >= 1600 & Quota < 2400 & Valore < -22 ~ NA,
+            Quota >= 2400 & Quota < 3200 & Valore < -25 ~ NA,
+            TRUE ~ Valore
+        ),
+        Stato = ifelse(is.na(Valore), "NA", Stato)
+    )
+
+temp_merged <- temp_merged_altitude |>
+    select(IdSensore, Data, Valore, Stato)
+```
+
+## 2.5 Computing daily average per sensor
+
+Let's now compute the daily average for each sensor. First, extract the date from `Data`:
+
+```{r}
+temp_daily <- temp_merged |>
+    mutate(Data = floor_date(Data, unit = "day"))
+temp_daily
+```
+
+Then compute the average readings for each sensor within each day:
+
+```{r}
+temp_daily <- temp_daily |>
+    group_by(IdSensore, Data) |>
+    summarise(
+        Media = if (all(is.na(Valore))) -999 else round(mean(Valore, na.rm = TRUE)),
+        Min = if (all(is.na(Valore))) -999 else min(Valore, na.rm = TRUE),
+        Max = if (all(is.na(Valore))) -999 else max(Valore, na.rm = TRUE),
+        .groups = "drop"
+    ) |>
+    mutate(Stato = ifelse(Media == -999, "NA", "VA"))
+temp_daily
+```
+
+## 2.6 Quick inspection and saving
+
+Finally, save the computed temperature daily average in a separate .csv file:
+
+```{r}
+write.csv(
+    temp_daily,
+    file = "processed_dataset/Temperatura_dal_01062023_al_01062024.csv",
+    sep = ",",
+    quote = FALSE,
+    row.names = FALSE
+)
+```

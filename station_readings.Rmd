@@ -1,0 +1,767 @@
+---
+title: "Station Readings"
+output: html_notebook
+---
+
+# 1. Imports
+
+```{r, include=FALSE}
+library(corrplot)
+library(geosphere)
+library(tidyverse)
+library(sf)
+Sys.setlocale("LC_TIME", "en_US")
+```
+
+## 1.1 Readings datasets
+
+Let's start by importing all processed readings:
+
+```{r}
+snow_readings <- read.csv(
+    "processed_dataset/Altezza_neve_dal_01062023_al_01062024.csv",
+    header = TRUE,
+    strip.white = TRUE,
+    na.strings = c("-999")
+)
+
+irrad_readings <- read.csv(
+    "processed_dataset/Radiazione_Globale_dal_01062023_al_01062024.csv",
+    header = TRUE,
+    strip.white = TRUE,
+    na.strings = c("-999")
+)
+
+temp_readings <- read.csv(
+    "processed_dataset/Temperatura_dal_01062023_al_01062024.csv",
+    header = TRUE,
+    strip.white = TRUE,
+    na.strings = c("-999")
+)
+
+humid_readings <- read.csv(
+    "processed_dataset/Umidita_relativa_dal_01062023_al_01062024.csv",
+    header = TRUE,
+    strip.white = TRUE,
+    na.strings = c("-999")
+)
+
+prcp_readings <- read.csv(
+    "processed_dataset/Precipitazioni_dal_01062023_al_01062024.csv",
+    header = TRUE,
+    strip.white = TRUE,
+    na.strings = c("-999")
+)
+```
+
+Let's apply some small preprocessing to the imported datasets:
+
+```{r}
+snow_readings <- snow_readings |>
+    mutate(
+        IdSensore = as.factor(IdSensore),
+        Data = ymd(Data),
+        Stato = as.factor(Stato)
+    )
+
+irrad_readings <- irrad_readings |>
+    mutate(
+        IdSensore = as.factor(IdSensore),
+        Data = ymd(Data),
+        Stato = as.factor(Stato)
+    )
+
+temp_readings <- temp_readings |>
+    mutate(
+        IdSensore = as.factor(IdSensore),
+        Data = ymd(Data),
+        Stato = as.factor(Stato)
+    )
+
+humid_readings <- humid_readings |>
+    mutate(
+        IdSensore = as.factor(IdSensore),
+        Data = ymd(Data),
+        Stato = as.factor(Stato)
+    )
+
+prcp_readings <- prcp_readings |>
+    mutate(
+        IdSensore = as.factor(IdSensore),
+        Data = ymd(Data),
+        Stato = as.factor(Stato)
+    )
+```
+
+## 1.2 Sensors/stations dataset
+
+We also need the processed Lombardy stations for the analysis:
+
+```{r}
+sensors <- read.csv(
+    "processed_dataset//Stazioni_Idro_Nivo_Meteorologiche.csv",
+    header = TRUE,
+    strip.white = TRUE
+)
+```
+
+Let's also extract the different types of sensors:
+
+```{r}
+snow_sensors <- sensors |>
+    filter(Tipologia == "Altezza Neve") |>
+    mutate(
+        IdSensore = as.factor(IdSensore),
+        IdStazione = as.factor(IdStazione),
+        Provincia = as.factor(Provincia),
+        NomeProvincia = as.factor(NomeProvincia)
+    )
+
+irrad_sensors <- sensors |>
+    filter(Tipologia == "Radiazione Globale") |>
+    mutate(
+        IdSensore = as.factor(IdSensore),
+        IdStazione = as.factor(IdStazione),
+        Provincia = as.factor(Provincia),
+        NomeProvincia = as.factor(NomeProvincia)
+    )
+
+temp_sensors <- sensors |>
+    filter(Tipologia == "Temperatura") |>
+    mutate(
+        IdSensore = as.factor(IdSensore),
+        IdStazione = as.factor(IdStazione),
+        Provincia = as.factor(Provincia),
+        NomeProvincia = as.factor(NomeProvincia)
+    )
+
+humid_sensors <- sensors |>
+    filter(Tipologia == "Umidità Relativa") |>
+    mutate(
+        IdSensore = as.factor(IdSensore),
+        IdStazione = as.factor(IdStazione),
+        Provincia = as.factor(Provincia),
+        NomeProvincia = as.factor(NomeProvincia)
+    )
+
+prcp_sensors <- sensors |>
+    filter(Tipologia == "Precipitazione") |>
+    mutate(
+        IdSensore = as.factor(IdSensore),
+        IdStazione = as.factor(IdStazione),
+        Provincia = as.factor(Provincia),
+        NomeProvincia = as.factor(NomeProvincia)
+    )
+```
+
+## 1.3 GeoJSON map
+
+Import the Lombardy GeoJSON map:
+
+```{r}
+lombardy <- st_read("geojson/lombardy_.geojson")
+```
+
+
+# 2. Combining Everything
+
+## 2.1 Merging all types of readings by station
+
+At this point, we need to combine each readings with the corresponding sensor information. This can be done with a left join on each reading dataset by the sensor/station dataset:
+
+```{r}
+snow_readings <- snow_readings |> left_join(snow_sensors, by = "IdSensore")
+irrad_readings <- irrad_readings |> left_join(irrad_sensors, by = "IdSensore")
+temp_readings <- temp_readings |> left_join(temp_sensors, by = "IdSensore")
+humid_readings <- humid_readings |> left_join(humid_sensors, by = "IdSensore")
+prcp_readings <- prcp_readings |> left_join(prcp_sensors, by = "IdSensore")
+```
+
+We also need to extract only the relevant information for the analysis, and rename a few columns for clarity:
+
+```{r}
+snow_data <- snow_readings |> select(
+    IdStazione,
+    Data,
+    AvgSnowHeight = Media,
+    MinSnowHeight = Min,
+    MaxSnowHeight = Max,
+    NomeStazione,
+    Quota,
+    Provincia,
+    NomeProvincia,
+    lng,
+    lat
+)
+
+irrad_data <- irrad_readings |> select(
+    IdStazione,
+    Data,
+    AvgSolarIrradiance = Media,
+    MinSolarIrradiance = Min,
+    MaxSolarIrradiance = Max
+)
+
+temp_data <- temp_readings |> select(
+    IdStazione,
+    Data,
+    AvgTemperature = Media,
+    MinTemperature = Min,
+    MaxTemperature = Max
+)
+
+humid_data <- humid_readings |> select(
+    IdStazione,
+    Data,
+    AvgHumidity = Media,
+    MinHumidity = Min,
+    MaxHumidity = Max
+)
+
+prcp_data <- prcp_readings |> select(
+    IdStazione,
+    Data,
+    TotalPrecipitation = Valore
+)
+```
+
+Finally, let's merge all datasets based on the station IDs:
+
+```{r}
+station_data <- snow_data |>
+    inner_join(irrad_data, by = c("IdStazione", "Data")) |>
+    inner_join(temp_data, by = c("IdStazione", "Data")) |>
+    inner_join(humid_data, by = c("IdStazione", "Data")) |>
+    inner_join(prcp_data, by = c("IdStazione", "Data"))
+
+station_data$IdStazione <- droplevels(station_data$IdStazione)
+```
+
+## 2.2 Deriving readings by surrounding stations
+
+We're not in luck (porcoschifo), since only 21 out of 30 eligible stations (the ones equipped with a snow height sensor) have all other types of sensors available.
+
+```{r}
+complete_sta_ids <- unique(station_data$IdStazione)
+
+complete_irrad_sta_ids <- snow_data |>
+    inner_join(irrad_data, by = c("IdStazione", "Data")) |>
+    pull(IdStazione) |>
+    unique() |>
+    droplevels()
+missing_irrad_sta_ids <- factor(setdiff(unique(snow_data$IdStazione), complete_irrad_sta_ids))
+
+complete_humid_sta_ids <- snow_data |>
+    inner_join(humid_data, by = c("IdStazione", "Data")) |>
+    pull(IdStazione) |>
+    unique() |>
+    droplevels()
+
+missing_humid_sta_ids <- factor(setdiff(unique(snow_data$IdStazione), complete_humid_sta_ids))
+```
+
+Let's see it visually:
+
+```{r}
+sta_unequipped <- ggplot() + 
+    geom_sf(
+        data = lombardy,
+        fill = "#c4e3ed",
+        color = "black"
+    ) + 
+    geom_point(
+        data = snow_sensors |> filter(IdStazione %in% complete_sta_ids),
+        mapping = aes(x = lng, y = lat, color = "Fully-Equipped"),
+        size = 2.5,
+    ) + 
+    geom_point(
+        data = snow_sensors |> filter(IdStazione %in% missing_irrad_sta_ids),
+        mapping = aes(x = lng, y = lat, color = "Missing Radiometer"),
+        size = 2.5,
+    ) + 
+    geom_point(
+        data = snow_sensors |> filter(IdStazione %in% missing_humid_sta_ids),
+        mapping = aes(x = lng, y = lat, color = "Missing Hygrometer"),
+        size = 2.5,
+    ) +
+    scale_color_manual(
+        values = c(
+            "Fully-Equipped" = "#04BF33",
+            "Missing Radiometer" = "#F26D6D",
+            "Missing Hygrometer" = "#5E9FF2"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        axis.text = element_blank(),
+        legend.text = element_text(size = 14),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()
+    )
+sta_unequipped
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/stations_unequipped.png",
+    plot = sta_unequipped,
+    width = 24,
+    height = 16,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+Luckily, only solar irradiance (8) and relative humidity (1) sensors are missing from each of these incomplete stations.
+
+### 2.2.1 Deriving solar irradiance readings
+
+Let's see the stations with missing solar irradiance sensors, and the surrounding stations equipped with solar irradiance sensors:
+
+```{r}
+complete_sta_ids <- snow_data |>
+    inner_join(irrad_data, by = c("IdStazione", "Data")) |>
+    pull(IdStazione) |>
+    unique() |>
+    droplevels()
+
+missing_sta_ids <- factor(setdiff(unique(snow_data$IdStazione), complete_sta_ids))
+```
+
+```{r}
+sta_irrad_incomplete <- ggplot() + 
+    geom_sf(
+        data = lombardy,
+        fill = "#c4e3ed",
+        color = "black"
+    ) + 
+    geom_point(
+        data = irrad_sensors,
+        mapping = aes(x = lng, y = lat, color = "Radiometer-Equipped"),
+        size = 2.5,
+    ) + 
+    geom_point(
+        data = snow_sensors |> filter(IdStazione %in% missing_sta_ids),
+        mapping = aes(x = lng, y = lat, color = "Missing Radiometer"),
+        size = 2.5,
+    ) +
+    scale_color_manual(
+        values = c(
+            "Radiometer-Equipped" = "#04BF33",
+            "Missing Radiometer" = "#F26D6D"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        legend.text = element_text(size = 18),
+        axis.text = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()
+    )
+sta_irrad_incomplete
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/stations_irrad_incomplete.png",
+    plot = sta_irrad_incomplete,
+    width = 18,
+    height = 18,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+Wouldn't it be nice if we could make an approximation of solar irradiance based on the surrounding stations? Let's first define a function to compute the distance between two geographic locations, based on their coordinates:
+
+```{r}
+# Function to calculate distance between two points (Haversine formula)
+calculate_distance <- function(lat1, lon1, lat2, lon2) {
+  distHaversine(c(lon1, lat1), c(lon2, lat2)) / 1000  # Convert to kilometers
+}
+```
+
+Then compute these distances from the incomplete stations, and filter those within 15Km:
+
+```{r}
+# Extract stations
+incomplete_sta <- snow_sensors |>
+    filter(IdStazione %in% missing_sta_ids)
+
+equipped_sta <- irrad_sensors
+
+# Create a dataframe to store the distances
+distance_df <- expand.grid(incomplete_sta$IdStazione, equipped_sta$IdStazione)
+colnames(distance_df) <- c("IncompleteStation", "EquippedStation")
+
+# Calculate distances
+distance_df <- distance_df |>
+    rowwise() |>
+        mutate(
+            Distance = calculate_distance(
+              incomplete_sta$lat[IncompleteStation == incomplete_sta$IdStazione],
+              incomplete_sta$lng[IncompleteStation == incomplete_sta$IdStazione],
+              equipped_sta$lat[EquippedStation == equipped_sta$IdStazione],
+              equipped_sta$lng[EquippedStation == equipped_sta$IdStazione]
+            )
+    ) |>
+    filter(Distance <= 15)
+
+# Extract surrounding stations
+equipped_sta <- irrad_sensors |>
+    filter(IdStazione %in% unique(distance_df$EquippedStation))
+```
+
+Let's visualize the surrounding equipped stations:
+
+```{r}
+sta_irrad_around <- ggplot() + 
+    geom_sf(
+        data = lombardy,
+        fill = "#c4e3ed",
+        color = "black"
+    ) + 
+    geom_point(
+        data = equipped_sta,
+        mapping = aes(x = lng, y = lat, color = "Radiometer In-Range"),
+        size = 2.5,
+    ) + 
+    geom_point(
+        data = incomplete_sta,
+        mapping = aes(x = lng, y = lat, color = "Missing Radiometer"),
+        size = 2.5,
+    ) +
+    scale_color_manual(
+        values = c(
+            "Radiometer In-Range" = "#D9B533",
+            "Missing Radiometer" = "#F26D6D"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        legend.text = element_text(size = 18),
+        axis.text = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()
+    )
+sta_irrad_around
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/stations_irrad_around.png",
+    plot = sta_irrad_around,
+    width = 18,
+    height = 18,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+```{r}
+ggsave(
+    filename = "images/stations_irrad_around.png",
+    plot = sta_irrad_incomplete + sta_irrad_around,
+    width = 36,
+    height = 18,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+Now that we have the surrounding stations, we can compute an approximation of the solar irradiance for each incomplete station:
+
+```{r}
+approx_irrad_data <- distance_df |>
+    inner_join(
+        irrad_data,
+        by = c("EquippedStation" = "IdStazione"),
+        relationship = "many-to-many"
+    ) |>
+    group_by(IncompleteStation, Data) |>
+    summarise(
+        AvgSolarIrradiance = if (all(is.na(AvgSolarIrradiance))) -999 else round(mean(AvgSolarIrradiance, na.rm = TRUE)),
+        MinSolarIrradiance = if (all(is.na(MinSolarIrradiance))) -999 else min(MinSolarIrradiance, na.rm = TRUE),
+        MaxSolarIrradiance = if (all(is.na(MaxSolarIrradiance))) -999 else max(MaxSolarIrradiance, na.rm = TRUE),
+        .groups = "drop"
+    )
+
+colnames(approx_irrad_data) <- c("IdStazione", "Data", "AvgSolarIrradiance", "MinSolarIrradiance", "MaxSolarIrradiance")
+```
+
+Then we merge all datasets based on the station IDs:
+
+```{r}
+incomplete_station_data <- snow_data |>
+    filter(IdStazione %in% missing_sta_ids) |>
+    inner_join(approx_irrad_data, by = c("IdStazione", "Data")) |>
+    inner_join(temp_data, by = c("IdStazione", "Data")) |>
+    inner_join(humid_data, by = c("IdStazione", "Data")) |>
+    inner_join(prcp_data, by = c("IdStazione", "Data"))
+
+incomplete_station_data$IdStazione <- droplevels(incomplete_station_data$IdStazione)
+```
+
+And finally add all the not-anymore-incomplete stations to the stations data:
+
+```{r}
+station_data <- bind_rows(station_data, incomplete_station_data)
+station_data <- station_data |>
+    distinct(IdStazione, Data, .keep_all = TRUE)
+```
+
+### 2.2.2 Deriving humidity readings
+
+Let's see the stations with missing relative humidity sensors, and the surrounding stations equipped with relative humidity sensors:
+
+```{r}
+complete_sta_ids <- snow_data |>
+    inner_join(humid_data, by = c("IdStazione", "Data")) |>
+    pull(IdStazione) |>
+    unique() |>
+    droplevels()
+
+missing_sta_ids <- factor(setdiff(unique(snow_data$IdStazione), complete_sta_ids))
+```
+
+```{r}
+ggplot() + 
+    geom_sf(
+        data = lombardy,
+        fill = "#c4e3ed",
+        color = "black"
+    ) + 
+    geom_point(
+        data = humid_sensors,
+        mapping = aes(x = lng, y = lat, color = "Hygrometer-Equipped"),
+        size = 2.5,
+    ) + 
+    geom_point(
+        data = snow_sensors |> filter(IdStazione %in% missing_sta_ids),
+        mapping = aes(x = lng, y = lat, color = "Missing Hygrometer"),
+        size = 2.5,
+    ) +
+    scale_color_manual(
+        values = c(
+            "Hygrometer-Equipped" = "#04BF33",
+            "Missing Hygrometer" = "#5E9FF2"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        axis.text = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()
+    )
+```
+
+Compute the distances from the incomplete stations, and filter those within 15Km:
+
+```{r}
+# Extract stations
+incomplete_sta <- snow_sensors |>
+    filter(IdStazione %in% missing_sta_ids)
+
+equipped_sta <- humid_sensors
+
+# Create a dataframe to store the distances
+distance_df <- expand.grid(incomplete_sta$IdStazione, equipped_sta$IdStazione)
+colnames(distance_df) <- c("IncompleteStation", "EquippedStation")
+
+# Calculate distances
+distance_df <- distance_df |>
+    rowwise() |>
+        mutate(
+            Distance = calculate_distance(
+              incomplete_sta$lat[IncompleteStation == incomplete_sta$IdStazione],
+              incomplete_sta$lng[IncompleteStation == incomplete_sta$IdStazione],
+              equipped_sta$lat[EquippedStation == equipped_sta$IdStazione],
+              equipped_sta$lng[EquippedStation == equipped_sta$IdStazione]
+            )
+    ) |>
+    filter(Distance <= 15)
+
+# Extract surrounding stations
+equipped_sta <- humid_sensors |>
+    filter(IdStazione %in% unique(distance_df$EquippedStation))
+```
+
+Let's visualize the surrounding equipped stations:
+
+```{r}
+ggplot() + 
+    geom_sf(
+        data = lombardy,
+        fill = "#c4e3ed",
+        color = "black"
+    ) + 
+    geom_point(
+        data = equipped_sta,
+        mapping = aes(x = lng, y = lat, color = "Hygrometer In-Range"),
+        size = 2.5,
+    ) + 
+    geom_point(
+        data = incomplete_sta,
+        mapping = aes(x = lng, y = lat, color = "Missing Hygrometer"),
+        size = 2.5,
+    ) +
+    scale_color_manual(
+        values = c(
+            "Hygrometer In-Range" = "#D9B533",
+            "Missing Hygrometer" = "#5E9FF2"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        axis.text = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()
+    )
+```
+
+Now that we have the surrounding stations, we can compute an approximation of the solar irradiance for each incomplete station:
+
+```{r}
+approx_humid_data <- distance_df |>
+    inner_join(
+        humid_data,
+        by = c("EquippedStation" = "IdStazione"),
+        relationship = "many-to-many"
+    ) |>
+    group_by(IncompleteStation, Data) |>
+    summarise(
+        AvgHumidity = if (all(is.na(AvgHumidity))) -999 else round(mean(AvgHumidity, na.rm = TRUE)),
+        MinHumidity = if (all(is.na(MinHumidity))) -999 else min(MinHumidity, na.rm = TRUE),
+        MaxHumidity = if (all(is.na(MaxHumidity))) -999 else max(MaxHumidity, na.rm = TRUE),
+        .groups = "drop"
+    )
+
+colnames(approx_humid_data) <- c("IdStazione", "Data", "AvgHumidity", "MinHumidity", "MaxHumidity")
+```
+
+Then we merge all datasets based on the station IDs:
+
+```{r}
+incomplete_station_data <- snow_data |>
+    filter(IdStazione %in% missing_sta_ids) |>
+    inner_join(approx_humid_data, by = c("IdStazione", "Data")) |>
+    inner_join(irrad_data, by = c("IdStazione", "Data")) |>
+    inner_join(temp_data, by = c("IdStazione", "Data")) |>
+    inner_join(prcp_data, by = c("IdStazione", "Data"))
+
+incomplete_station_data$IdStazione <- droplevels(incomplete_station_data$IdStazione)
+```
+
+And finally add all the not-anymore-incomplete stations to the stations data:
+
+```{r}
+station_data <- bind_rows(station_data, incomplete_station_data)
+station_data <- station_data |>
+    distinct(IdStazione, Data, .keep_all = TRUE)
+```
+
+## 2.3 Saving to CSV
+
+For saving in a CSV file, we would prefer to replace all `NA` values with `-999`:
+
+```{r}
+station_data <- station_data |>
+    mutate(across(
+        c(
+            AvgSnowHeight,
+            MinSnowHeight,
+            MaxSnowHeight,
+            AvgSolarIrradiance,
+            MinSolarIrradiance,
+            MaxSolarIrradiance,
+            AvgTemperature,
+            MinTemperature,
+            MaxTemperature,
+            AvgHumidity,
+            MinHumidity,
+            MaxHumidity,
+            TotalPrecipitation
+        ),
+        ~ replace_na(., -999)
+    ))
+```
+
+Not really necessary, but let's reorder the columns and rename them in Italian:
+
+```{r}
+final_data <- station_data |>
+    select(
+        IdStazione,
+        Data,
+        AvgSnowHeight,
+        MinSnowHeight,
+        MaxSnowHeight,
+        AvgSolarIrradiance,
+        MinSolarIrradiance,
+        MaxSolarIrradiance,
+        AvgTemperature,
+        MinTemperature,
+        MaxTemperature,
+        AvgHumidity,
+        MinHumidity,
+        MaxHumidity,
+        TotalPrecipitation
+    ) |>
+    rename(
+        MediaAltezzaNeve = AvgSnowHeight,
+        MinAltezzaNeve = MinSnowHeight,
+        MaxAltezzaNeve = MaxSnowHeight,
+        MediaIrraggiamento = AvgSolarIrradiance,
+        MinIrraggiamento = MinSolarIrradiance,
+        MaxIrraggiamento = MaxSolarIrradiance,
+        MediaTemperatura = AvgTemperature,
+        MinTemperatura = MinTemperature,
+        MaxTemperatura = MaxTemperature,
+        MediaUmidità = AvgHumidity,
+        MinUmidità = MinHumidity,
+        MaxUmidità = MaxHumidity,
+        TotPrecipitazione = TotalPrecipitation
+    ) |>
+    arrange(IdStazione, Data)
+```
+
+Finally, save the computed station daily average readings in a separate .csv file:
+
+```{r}
+write.csv(
+    final_data,
+    file = "processed_dataset/Letture_Stazioni_dal_01062023_al_01062024.csv",
+    sep = ",",
+    quote = FALSE,
+    row.names = FALSE
+)
+```

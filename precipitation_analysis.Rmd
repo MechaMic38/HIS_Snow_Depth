@@ -1,0 +1,451 @@
+---
+title: "Precipitation Analysis"
+output: html_notebook
+---
+
+# 1. Imports
+
+```{r, include=FALSE}
+library(corrplot)
+library(tidyverse)
+library(sf)
+Sys.setlocale("LC_TIME", "en_US")
+```
+
+## 1.1 Readings datasets
+
+Let's start by importing the processed precipitation readings:
+
+```{r}
+prcp_readings <- read.csv(
+    "processed_dataset/Precipitazioni_dal_01062023_al_01062024.csv",
+    header = TRUE,
+    strip.white = TRUE,
+    na.strings = c("-999")
+)
+```
+
+Let's apply some small preprocessing to the imported dataset:
+
+```{r}
+prcp_readings <- prcp_readings |>
+    mutate(
+        IdSensore = as.factor(IdSensore),
+        Data = ymd(Data),
+        Stato = as.factor(Stato)
+    )
+```
+
+## 1.2 Sensors/stations dataset
+
+We also need the processed Lombardy stations for the analysis:
+
+```{r}
+sensors <- read.csv(
+    "processed_dataset//Stazioni_Idro_Nivo_Meteorologiche.csv",
+    header = TRUE,
+    strip.white = TRUE
+)
+```
+
+Let's extract the necessary sensors:
+
+```{r}
+prcp_sensors <- sensors |>
+    filter(Tipologia == "Precipitazione") |>
+    mutate(
+        IdSensore = as.factor(IdSensore),
+        Provincia = as.factor(Provincia)
+    )
+```
+
+
+# 2. Time-Coverage Analysis
+
+Let's see the time coverage of data by each type of sensor. First of, let's extract the month from each reading:
+
+```{r}
+prcp_readings <- prcp_readings |>
+    mutate(Month = month(Data, label=TRUE, abbr=FALSE))
+```
+
+We also need to join the readings dataset with the sensors dataset:
+
+```{r}
+prcp_sensor_readings <- left_join(
+    prcp_readings,
+    prcp_sensors,
+    join_by(IdSensore == IdSensore)
+)
+```
+
+Finally, let's compute the time-coverage graph:
+
+```{r}
+prcp_sensor_readings |> 
+    filter(Stato == "VA") |>
+    ggplot(
+        aes(x = Data, y = IdSensore)
+    ) +
+    geom_point(
+        aes(color = Month)
+    ) +
+    facet_wrap(
+        . ~ Provincia,
+        scales = "free_y"
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank()
+    ) + theme_minimal() +
+    theme(
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_line(color = "grey90", linetype = "dashed")
+    )
+```
+
+Data is available for the entire year. Some sensors have missing days or entire months, probably either due to malfunctions that required on-site repairs, or because they were commissioned during the time period.
+
+# 3. Precipitation Evolution
+
+## 3.1 Correlation
+
+Let's try to understand what could be related to the evolution of the snow height, by drawing a correlation plot. We first need to compute the correlation matrix on the desired features:
+
+```{r}
+prcp_sensor_readings_tmp <- prcp_sensor_readings |>
+    filter(Stato == "VA") |>
+    mutate(Month = month(Data)) |>
+    select(
+        Valore,
+        Month,
+        Quota,
+        lat,
+        lng
+    )
+
+prcp_cor = cor(prcp_sensor_readings_tmp, use = "complete.obs")
+```
+
+Finally, we just need to plot the correlation graph:
+
+```{r}
+col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
+
+corrplot(prcp_cor, method = "shade", shade.col = NA, tl.col = "black", tl.srt = 45,
+         col = col(200), addCoef.col = "black", cl.pos = "n", order = "AOE")
+```
+
+Doesn't look like there is any relationship between precipitation and altitude at which the reading is made. Let's see it within a scatterplot:
+
+```{r}
+prcp_sensor_readings |>
+    filter(Stato == "VA") |>
+    ggplot(
+        aes(x = Quota, y = Valore)
+    ) +
+    geom_point(
+        aes(color = Valore)
+    ) +
+    stat_smooth(
+        method = "lm"
+    ) +
+    labs(
+        x = "Average Precipitation (mm)",
+        y = "Altitude (m)"
+    ) +
+    scale_colour_distiller(palette = "Blues") +
+    theme_minimal()
+```
+
+```{r}
+prcp_sensor_readings |>
+    filter(
+        Stato == "VA",
+        !(Month %in% c("June", "July", "August", "September"))
+    ) |>
+    ggplot(
+        aes(x = Quota, y = Valore)
+    ) +
+    geom_point(
+        aes(color = Valore)
+    ) +
+    geom_smooth(
+        method = "lm", se = FALSE,
+        color = "gray20", linetype = "dashed"
+    ) +
+    facet_wrap(
+        . ~ Month,
+        ncol = 3
+    ) +
+    labs(
+        x = "Average Precipitation (mm)",
+        y = "Altitude (m)"
+    ) +
+    theme_minimal() +
+    scale_colour_distiller(palette = "Blues") +
+    theme(
+        legend.position = "inside",
+        legend.justification = c(1,0), legend.position.inside = c(1,0),
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+```
+
+## 3.1 Annual precipitation trend
+
+Compute mean readings for each province:
+
+```{r}
+monthly_prcp <- prcp_sensor_readings |>
+    mutate(
+        Month = month(Data),
+        Year = year(Data)
+    ) |>
+    group_by(Provincia, NomeProvincia, Month, Year) |>
+    summarise(
+        Totale = if (all(is.na(Valore))) NA else sum(Valore, na.rm = TRUE),
+        Media = if (all(is.na(Valore))) NA else round(mean(Valore, na.rm = TRUE)),
+        .groups = "drop"
+    ) |>
+    mutate(Stato = ifelse(is.na(Totale), "NA", "VA"))
+```
+
+```{r}
+# Create a new column for month-year labels
+monthly_prcp <- monthly_prcp %>%
+    mutate(
+        MonthLabel = case_when(
+            Month == 6 & Year == 2023 ~ "Jun\n2023",
+            Month == 7 & Year == 2023 ~ "Jul",
+            Month == 8 & Year == 2023 ~ "Aug",
+            Month == 9 & Year == 2023 ~ "Sep",
+            Month == 10 & Year == 2023 ~ "Oct",
+            Month == 11 & Year == 2023 ~ "Nov",
+            Month == 12 & Year == 2023 ~ "Dec",
+            Month == 1 & Year == 2024 ~ "Jan\n2024",
+            Month == 2 & Year == 2024 ~ "Feb",
+            Month == 3 & Year == 2024 ~ "Mar",
+            Month == 4 & Year == 2024 ~ "Apr",
+            Month == 5 & Year == 2024 ~ "May"
+        )
+    )
+
+# Ensure the month-year labels are in the correct order
+monthly_prcp$MonthLabel <- factor(
+    monthly_prcp$MonthLabel,
+    levels = c(
+        "Jun\n2023", "Jul", "Aug", "Sep",
+         "Oct", "Nov", "Dec", "Jan\n2024",
+         "Feb", "Mar", "Apr", "May"
+    )
+)
+```
+
+
+Now we just have to plot the monthly trend for each province, starting with total precipitation:
+
+```{r}
+monthly_prcp |>
+    filter(Stato == "VA") |>
+    mutate(
+        Data = make_date(Year, Month, day = 1),
+        NomeProvincia = paste(NomeProvincia, " (", Provincia, ")", sep = "")
+    ) |>
+    ggplot(
+        aes(x = MonthLabel, y = Totale)
+    ) +
+    geom_col(
+        aes(fill = NomeProvincia)
+    ) +
+    geom_smooth(
+        method = "lm", se = FALSE,
+        color = "gray20", linetype = "dashed"
+    ) +
+    facet_wrap(
+        . ~ NomeProvincia,
+        ncol = 3
+    ) +
+    labs(
+        x = element_blank(),
+        y = "Precipitation (mm)",
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+```
+
+Then with average precipitation:
+
+```{r}
+gg_prcp_monthly <- monthly_prcp |>
+    filter(Stato == "VA") |>
+    mutate(
+        Data = make_date(Year, Month, day = 1),
+        NomeProvincia = paste(NomeProvincia, " (", Provincia, ")", sep = "")
+    ) |>
+    ggplot(
+        aes(x = Data, y = Media)
+    ) +
+    geom_col(
+        aes(fill = NomeProvincia),
+        width = 24
+    ) +
+    geom_smooth(
+        method = "lm", se = FALSE,
+        color = "gray20", linetype = "dashed"
+    ) +
+    facet_wrap(
+        . ~ NomeProvincia,
+        ncol = 3
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short(),
+        limits = c(as.Date("2023-05-20"), as.Date("2024-05-13"))
+    ) +
+    labs(
+        x = element_blank(),
+        y = "Precipitation (mm)",
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+gg_prcp_monthly
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/prcp_monthly.jpg",
+    plot = gg_prcp_monthly,
+    width = 24,
+    height = 14,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+All provinces show a positive increase in precipitation during the period of analysis, with the exception of Sondrio (despite the park in October).
+
+## 3.2 Altitude precipitation trend
+
+Let's try to plot a boxplot of precipitation over altitude:
+
+```{r}
+prcp_sensor_readings$AltitudeRange <- cut(
+    prcp_sensor_readings$Quota,
+    breaks = seq(0, 3200, by = 800),
+    labels = c("0-800m", "800-1600m", "1600-2400m", "2400-3200m")
+)
+
+prcp_sensor_readings |>
+    filter(
+        Stato == "VA",
+        !(Month %in% c("June", "July", "August", "September"))
+    ) |>
+    ggplot(
+        aes(x = AltitudeRange, y = Valore)
+    ) +
+    geom_boxplot(
+        aes(fill = AltitudeRange)
+    ) +
+    facet_wrap(
+        . ~ Month,
+        ncol = 3
+    ) +
+    labs(
+        x = element_blank(), y = "Precipitation (mm)"
+    ) +
+    scale_fill_brewer(palette = "Blues") +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+```
+
+Let's try to compute the monthly average for each sensor:
+
+```{r}
+monthly_prcp_sensor <- prcp_sensor_readings |>
+    mutate(
+        Month = month(Data),
+        Year = year(Data)
+    ) |>
+    group_by(IdSensore, NomeStazione, Quota, Month, Year) |>
+    summarise(
+        Totale = if (all(is.na(Valore))) NA else sum(Valore, na.rm = TRUE),
+        Media = if (all(is.na(Valore))) NA else round(mean(Valore, na.rm = TRUE)),
+        .groups = "drop"
+    ) |>
+    mutate(Stato = ifelse(is.na(Totale), "NA", "VA"))
+```
+
+Finally, let's plot the time-series at different altitude ranges:
+
+```{r}
+monthly_prcp_sensor$AltitudeRange <- cut(
+    monthly_prcp_sensor$Quota,
+    breaks = seq(0, 3200, by = 800),
+    labels = c("0-800m", "800-1600m", "1600-2400m", "2400-3200m")
+)
+
+monthly_prcp_sensor |>
+    filter(Stato == "VA") |>
+    mutate(
+        Data = make_date(Year, Month, day = 1)
+    ) |>
+    ggplot(
+        aes(x = Data, y = Media)
+    ) +
+    geom_density(
+        stat = "identity",
+        aes(color = IdSensore, fill = IdSensore),
+        alpha = 0.15
+    ) +
+    facet_wrap(
+        . ~ AltitudeRange,
+        ncol = 3
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    labs(
+        x = element_blank(),
+        y = "Precipitation (mm)",
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+```
+
+Precipitation and altitude are independent (as was already proven by the correlation matrix).

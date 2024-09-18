@@ -1,0 +1,619 @@
+---
+title: "ARPA Lombardy Stations"
+output: html_notebook
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+library(sf)
+library(oce)
+Sys.setlocale("LC_TIME", "en_US")
+```
+
+Import all sensors with relative stations from the `Stazioni_Idro_Nivo_Meteorologiche_20240624` dataset:
+
+```{r}
+sensors <- read.csv(
+    "arpa_dataset/Stazioni_Idro_Nivo_Meteorologiche.csv",
+    header = TRUE,
+    strip.white = TRUE
+)
+sensors
+```
+
+# 1. Data Cleaning
+
+Analyze the structure of the sensors dataset:
+
+```{r}
+str(sensors)
+```
+Check that there are no duplicate sensors within the dataset:
+
+```{r}
+nrow(sensors)
+length(unique(sensors$IdSensore))
+```
+Check that there are no duplicate stations within the dataset:
+```{r}
+length(unique(sensors$IdStazione))
+length(unique(sensors$NomeStazione))
+```
+
+Turn the type of sensor from character to factor (there are no incorrect values), as well the measuring unit (there are no incorrect values):
+
+```{r}
+sensors$Tipologia <- as.factor(sensors$Tipologia)
+sensors$Unità.DiMisura <- as.factor(sensors$Unità.DiMisura)
+```
+
+Turn the province of each sensor from character to factor (there are no incorrect values):
+
+```{r}
+sensors$Provincia <- as.factor(sensors$Provincia)
+```
+
+Some sensors do not have their coordinates set correctly, but it's possible to derive both `lng` and `lat` by using the provided `UTM_Nord` and `UTM_Est`:
+
+```{r}
+# Check which rows have missing lat and lng
+missing_coords <- sensors$lat == 0.0 & sensors$lng == 0.0
+
+# Convert UTM to geographic coordinates
+utm_coords <- data.frame(
+    easting = sensors$UTM_Est[missing_coords],
+    northing = sensors$UTM_Nord[missing_coords]
+)
+lat_lng <- utm2lonlat(
+    easting = utm_coords$easting,
+    northing = utm_coords$northing,
+    zone = 32
+)
+
+# Replace the missing lat and lng in the original dataset
+sensors$lat[missing_coords] <- lat_lng$latitude
+sensors$lng[missing_coords] <- lat_lng$longitude
+```
+
+Let's also provide the full name of each province, based on the `Provincia` attribute:
+
+```{r}
+provinces <- c(
+  "BG" = "Bergamo", 
+  "BS" = "Brescia", 
+  "CO" = "Como", 
+  "CR" = "Cremona", 
+  "LC" = "Lecco", 
+  "LO" = "Lodi", 
+  "MB" = "Monza e Brianza", 
+  "MI" = "Milano", 
+  "MN" = "Mantova", 
+  "PV" = "Pavia", 
+  "SO" = "Sondrio", 
+  "VA" = "Varese"
+)
+
+sensors <- sensors |> mutate(
+    NomeProvincia = recode(Provincia, !!!provinces)
+)
+```
+
+
+# 2. Sensors Map
+
+Import the Lombardy GeoJSON map:
+
+```{r}
+lombardy <- st_read("geojson/lombardy_.geojson")
+```
+
+Plot all 1271 sensors within the region:
+
+```{r}
+ggplot() + 
+    geom_sf(
+        data = lombardy,
+        fill = "#c4e3ed",
+        color = "black"
+    ) + 
+    geom_point(
+        data = sensors,
+        mapping = aes(x = lng, y = lat),
+        color = "#e05043",
+        size = 1
+    ) +
+    facet_wrap(~ Tipologia) +
+    labs(
+        title = "ARPA Lombardia's monitoring network",
+        subtitle = "All sensors existed to date",
+        x = element_blank(),
+        y = element_blank()
+    ) +
+    theme_minimal()
+```
+
+We don't need all these sensors, since we will be working exclusively with those related to `Altezza Neve` (Snow Height), `Precipitazione` (Precipitation), `Radiazione Globale` (Solar Irradiance) and `Temperatura` (Temperature). Let's filter the required stations:
+
+```{r}
+sensors <- sensors |> filter(Tipologia %in% c(
+    "Altezza Neve", "Precipitazione",
+    "Radiazione Globale", "Temperatura",
+    "Umidità Relativa"
+))
+```
+
+The number of sensors has been reduced from 1271 to only 886. Now let's re-plot all sensors left:
+
+```{r}
+ggplot() + 
+    geom_sf(
+        data = lombardy,
+        fill = "#c4e3ed",
+        color = "black"
+    ) + 
+    geom_point(
+        data = sensors,
+        mapping = aes(x = lng, y = lat),
+        color = "#e05043",
+        size = 1
+    ) +
+    labs(
+        title = "ARPA Lombardia's monitoring network",
+        subtitle = "Snow Height, Precipitation, Solar Irradiance, and Temperature sensors",
+        x = element_blank(),
+        y = element_blank()
+    ) +
+    facet_wrap(~ Tipologia) +
+    theme_minimal()
+```
+
+Some sensors have also been dismissed, and our analysis won't go earlier than June 2023, so we can remove those sensors that are no longer operational:
+
+```{r}
+sensors <- sensors |> filter(
+    (Storico == "N") | 
+    (Storico == "S" & as.Date(DataStop, format="%d/%m/%Y") >= "2023-06-01")
+)
+```
+
+This reduces even more the number of sensors, going from 886 to 718. Let's re-plot them:
+
+```{r}
+ggplot() + 
+    geom_sf(
+        data = lombardy,
+        fill = "#c4e3ed",
+        color = "black"
+    ) + 
+    geom_point(
+        data = sensors,
+        mapping = aes(x = lng, y = lat),
+        color = "#e05043",
+        size = 1
+    ) +
+    labs(
+        title = "ARPA Lombardia's monitoring network",
+        subtitle = "All currently active sensors",
+        x = element_blank(),
+        y = element_blank()
+    ) +
+    facet_wrap(~ Tipologia) +
+    theme_minimal()
+```
+
+Other fields can be removed, as they are not necessary, redundant or do not provide useful information:
+
+- `UTM_Nord`
+- `UTM_Est`
+- `Location`
+
+```{r}
+sensors <- sensors %>% select(
+    -UTM_Nord,
+    -UTM_Est,
+    -Location
+)
+```
+
+# 3. Sensors Distribution
+
+## 3.1 Snow Height sensors
+
+The `Altezza Neve` **(Snow Height)** sensors seem to be distributed mostly to the north of the region, with a unique exception in the south. Let's analyze the distribution by province:
+
+```{r}
+sensors |> filter(Tipologia == "Altezza Neve") |> ggplot(
+    mapping = aes(x = Provincia, fill = Provincia)
+) + 
+    geom_bar() +
+    labs(
+        title = "Snow depth sensors by province",
+        x = "Province",
+        y = "Count"
+    ) +
+    theme_minimal()
+```
+
+```{r}
+gg_snow_sensors <- ggplot() + 
+    geom_sf(
+        data = lombardy,
+        aes(fill = name),
+        color = "black"
+    ) + 
+    coord_sf() +
+    geom_point(
+        data = sensors |> filter(Tipologia == "Altezza Neve"),
+        mapping = aes(x = lng, y = lat),
+        size = 1.5,
+        alpha = 0.7
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        fill = element_blank()
+    ) +
+    scale_fill_brewer(palette = "Set3") +
+    theme_minimal() +
+    theme(
+        axis.text = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()
+    )
+gg_snow_sensors
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/snow_sensors.png",
+    plot = gg_snow_sensors,
+    width = 16,
+    height = 10,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+## 3.2 Precipitation sensors
+
+The `Precipitazione` **(Precipitation)** sensors are evenly distributed across all the region, with a bit higher density to the north-west. Let's analyze the distribution by province:
+
+```{r}
+sensors |> filter(Tipologia == "Precipitazione") |> ggplot(
+    mapping = aes(x = Provincia, fill = Provincia)
+) + 
+    geom_bar() +
+    labs(
+        title = "Precipitation sensors by province",
+        x = "Province",
+        y = "Count"
+    ) +
+    theme_minimal()
+```
+
+```{r}
+ggplot() + 
+    geom_sf(
+        data = lombardy,
+        aes(fill = name),
+        color = "black"
+    ) + 
+    coord_sf() +
+    geom_point(
+        data = sensors |> filter(Tipologia == "Precipitazione"),
+        mapping = aes(x = lng, y = lat),
+        size = 1.5,
+        alpha = 0.7
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        fill = element_blank()
+    ) +
+    scale_fill_brewer(palette = "Set3") +
+    theme_minimal() +
+    theme(
+        axis.text = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()
+    )
+```
+
+## 3.3 Solar Irradiance sensors
+
+As visible from the previous map, the `Radiazione Globale` **(Solar Irradiance)** sensors seem to be spread evenly across the entire region. Let's analyze the distribution by province:
+
+```{r}
+sensors |> filter(Tipologia == "Radiazione Globale") |> ggplot(
+    mapping = aes(x = Provincia, fill = Provincia)
+) + 
+    geom_bar() +
+    labs(
+        title = "Solar irradiance sensors by province",
+        x = "Province",
+        y = "Count"
+    ) +
+    theme_minimal()
+```
+
+```{r}
+ggplot() + 
+    geom_sf(
+        data = lombardy,
+        aes(fill = name),
+        color = "black"
+    ) + 
+    coord_sf() +
+    geom_point(
+        data = sensors |> filter(Tipologia == "Radiazione Globale"),
+        mapping = aes(x = lng, y = lat),
+        size = 1.5,
+        alpha = 0.7
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        fill = element_blank()
+    ) +
+    scale_fill_brewer(palette = "Set3") +
+    theme_minimal() +
+    theme(
+        axis.text = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()
+    )
+```
+
+## 3.4 Temperature
+
+As visible from the previous map, the `Temperatura` **(Temperature)** sensors seem to be distributed mostly to the north of the region. Let's analyze the distribution by province:
+
+```{r}
+sensors |> filter(Tipologia == "Temperatura") |> ggplot(
+    mapping = aes(x = Provincia, fill = Provincia)
+) + 
+    geom_bar() +
+    labs(
+        title = "Temperature sensors by province",
+        x = "Province",
+        y = "Count"
+    ) +
+    theme_minimal()
+```
+
+```{r}
+gg_temp_sensors <- ggplot() + 
+    geom_sf(
+        data = lombardy,
+        aes(fill = name),
+        color = "black"
+    ) + 
+    coord_sf() +
+    geom_point(
+        data = sensors |> filter(Tipologia == "Temperatura"),
+        mapping = aes(x = lng, y = lat),
+        size = 1.5,
+        alpha = 0.7
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        fill = element_blank()
+    ) +
+    scale_fill_brewer(palette = "Set3") +
+    theme_minimal() +
+    theme(
+        axis.text = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()
+    )
+gg_temp_sensors
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/temp_sensors.png",
+    plot = gg_temp_sensors,
+    width = 16,
+    height = 10,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+## 3.5 Humidity
+
+As visible from the previous map, the `Umidità Relativa` **(Relative Humidity)** sensors seem to be distributed mostly to the north of the region. Let's analyze the distribution by province:
+
+```{r}
+sensors |> filter(Tipologia == "Umidità Relativa") |> ggplot(
+    mapping = aes(x = Provincia, fill = Provincia)
+) + 
+    geom_bar() +
+    labs(
+        title = "Humidity sensors by province",
+        x = "Province",
+        y = "Count"
+    ) +
+    theme_minimal()
+```
+
+```{r}
+ggplot() + 
+    geom_sf(
+        data = lombardy,
+        aes(fill = name),
+        color = "black"
+    ) + 
+    coord_sf() +
+    geom_point(
+        data = sensors |> filter(Tipologia == "Umidità Relativa"),
+        mapping = aes(x = lng, y = lat),
+        size = 1.5,
+        alpha = 0.7
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        fill = element_blank()
+    ) +
+    scale_fill_brewer(palette = "Set3") +
+    theme_minimal() +
+    theme(
+        axis.text = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()
+    )
+```
+
+# 3.6 Altitude (Snow Height)
+
+Let's make an analysis of the distribution of snow height sensors, based on their altitude
+
+```{r}
+sensors |> filter(Tipologia == "Altezza Neve") |> ggplot(
+    mapping = aes(x = Provincia, y = Quota)
+) +
+    geom_boxplot() +
+    labs(
+        title = "Snow height sensor altitude by province",
+        x = element_blank(),
+        y = element_blank()
+    )
+```
+
+```{r}
+ggplot() + 
+    geom_sf(
+        data = lombardy,
+        fill = "#c4e3ed",
+        color = "black"
+    ) + 
+    geom_point(
+        data = sensors |> filter(Tipologia == "Altezza Neve"),
+        mapping = aes(x = lng, y = lat, color = Quota),
+        size = 2,
+    ) +
+    labs(
+        title = "Altitude of snow height sensors",
+        x = element_blank(),
+        y = element_blank()
+    ) +
+    theme_minimal() +
+    scale_color_continuous(type = "viridis")
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/temp_sensors.png",
+    plot = gg_temp_sensors,
+    width = 16,
+    height = 10,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+# 4. Further Sensor Filtering
+
+Snow Height sensors are only present in a subset of all Lombardy provinces:
+
+- Bergamo (BG)
+- Brescia (BS)
+- Como (CO)
+- Lecco (LC)
+- Pavia (PV)
+- Sondrio (SO)
+- Varese (VA)
+
+```{r}
+sensors |>
+    filter(Tipologia == "Altezza Neve") |>
+    group_by(Provincia) |>
+    count()
+```
+
+```{r}
+gg_sensor_types_by_province <- sensors |> 
+    ggplot(
+        mapping = aes(x = Provincia, fill = Provincia)
+    ) + 
+    geom_bar() +
+    facet_wrap(. ~ Tipologia) +
+    labs(
+        x = element_blank(),
+        y = element_blank()
+    ) +
+    scale_fill_brewer(palette = "Set3") +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        panel.grid.major.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+gg_sensor_types_by_province
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/sensor_types_by_province.png",
+    plot = gg_sensor_types_by_province,
+    width = 20,
+    height = 12.5,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+While for the other provinces there are no snow height sensors dislocated:
+
+- Cremona (CR)
+- Lodi (LO)
+- Monza e Brianza (MB)
+- Milano (MI)
+- Mantova (MN)
+
+Since the analysis is primarily focused on the evolution of snow height, for simplicity we can safely remove all the other sensors belonging to these provinces, further reducing the total number of sensors from 718 to 572:
+
+```{r}
+sensors <- sensors |> filter(Provincia %in% c(
+    "BG", "BS", "CO", "LC", "PV", "SO", "VA"
+))
+```
+
+```{r}
+ggplot() + 
+    geom_sf(
+        data = lombardy,
+        fill = "#c4e3ed",
+        color = "black"
+    ) + 
+    geom_point(
+        data = sensors,
+        mapping = aes(x = lng, y = lat),
+        color = "#e05043",
+        size = 1
+    ) +
+    labs(
+        title = "ARPA Lombardia's monitoring network",
+        subtitle = "Final distribution of selected sensors",
+        x = element_blank(),
+        y = element_blank()
+    ) +
+    facet_wrap(~ Tipologia) +
+    theme_minimal()
+```
+
+Finally, let's save the filtered sensors in a separate .csv file for future analysis:
+
+```{r}
+write.csv(
+    sensors,
+    file = "processed_dataset/Stazioni_Idro_Nivo_Meteorologiche.csv",
+    sep = ",",
+    quote = FALSE,
+    row.names = FALSE
+)
+```
+

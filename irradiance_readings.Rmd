@@ -1,0 +1,347 @@
+---
+title: "Solar Irradiance Readings"
+output: html_notebook
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+library(sf)
+```
+
+# Imports
+
+Import all solar irradiance readings from the `Radiazione_Globale_dal_01062023_al_01062024.csv` dataset:
+
+```{r}
+irradiance_readings <- read.csv(
+    "arpa_dataset/Radiazione_Globale_dal_01062023_al_01062024.csv",
+    header = TRUE,
+    strip.white = TRUE,
+    na.strings = c("-999")
+)
+irradiance_readings
+```
+
+This won't be fun, since the current meteo dataset contains readings from all types of sensors, which means I need to extract only the necessary ones. Let's first import the dataset `Dati_sensori_meteo_01012024_01062024.csv`:
+
+```{r}
+current_data <- read.csv(
+    "arpa_dataset/Dati_sensori_meteo_01012024_01062024.csv",
+    header = TRUE,
+    strip.white = TRUE,
+    na.strings = c("-999")
+)
+```
+
+I also need the elaborated station sensors data:
+
+```{r}
+sensors <- read.csv(
+    "processed_dataset/Stazioni_Idro_Nivo_Meteorologiche.csv",
+    header = TRUE,
+    strip.white = TRUE
+)
+```
+
+# 2. Preprocessing
+
+Extract the solar irradiance sensors:
+
+```{r}
+irradiance_sensor_ids <- sensors |>
+    filter(Tipologia == "Radiazione Globale") |>
+    pull(IdSensore) |>
+    unique()
+irradiance_sensor_ids
+```
+
+Filter out only the solar irradiance sensors preselected:
+
+```{r}
+irradiance_readings <- irradiance_readings |>
+    filter(idSensore %in% irradiance_sensor_ids)
+irradiance_readings
+```
+
+# 2.1 Data Cleaning
+
+First of all, let's rename the attribute `idSensore` to `IdSensore`, essential for later when merging:
+
+```{r}
+irradiance_readings <- irradiance_readings |>
+    rename(IdSensore = idSensore)
+```
+
+Let's see how many of the readings are invalid (NA):
+
+```{r}
+irradiance_readings |>
+    filter(Stato == "NA") |>
+    count()
+```
+
+Very few! Around 27K compared to 2.5M.
+Let's try to visualize only the valid ones.
+
+```{r}
+irradiance_readings |> filter(Stato == "VA")
+```
+
+I need to convert of dates of collection from character to usable date times:
+
+```{r}
+irradiance_readings <- irradiance_readings |>
+    mutate(Data = dmy_hms(Data))
+```
+
+Now let's try to visualize the number of valid readings by each sensor, and the starting date and ending date of their readings:
+
+```{r}
+irradiance_readings |>
+    group_by(IdSensore) |>
+    filter(Stato == "VA") |>
+    summarise(
+        min_date = min(Data),
+        max_date = max(Data),
+        valid_readings = n()
+    )
+    
+```
+
+## 2.2 Current Data readings
+
+Filter out only the solar irradiance sensor current readings:
+
+```{r}
+irradiance_current <- current_data |>
+    filter(IdSensore %in% irradiance_sensor_ids)
+irradiance_current
+```
+
+Let's repeat the same process as before, convert the datetimes into usable objects, and visualize the number of valid readings by each sensor, and the starting date and ending date of their readings:
+
+```{r}
+irradiance_current <- irradiance_current |>
+    mutate(Data = dmy_hms(Data))
+```
+
+```{r}
+irradiance_current |>
+    group_by(IdSensore) |>
+    filter(Stato == "VA") |>
+    summarise(
+        min_date = min(Data),
+        max_date = max(Data),
+        valid_readings = n()
+    )
+    
+```
+
+## 2.3 Merging historic with current
+
+Now let's merge both historic and current irradiance readings datasets:
+
+```{r}
+irradiance_merged <- bind_rows(irradiance_readings, irradiance_current)
+irradiance_merged
+```
+
+We need to remove all duplicate instances. Remember that an instance is identified by the reporting sensor, and the time and date of collection.
+
+```{r}
+irradiance_merged <- irradiance_merged |>
+    distinct(IdSensore, Data, .keep_all = TRUE)
+irradiance_merged
+```
+
+## 2.4 Checking for outlier readings
+
+We'd better check for readings that are way off the others, most likely due to sensor malfunctions. Let's plot them first by month:
+
+```{r}
+irradiance_merged |>
+    filter(Stato == "VA") |>
+    mutate(
+        Month = month(Data, label = TRUE)
+    ) |>
+    ggplot(
+        aes(x = Month, y = Valore)
+    ) +
+    geom_hline(
+        yintercept = 0, 
+        linetype = "dashed", 
+        color = "#F26D6D"
+    ) +
+    geom_boxplot(
+        aes(fill = Month)
+    ) +
+    labs(
+        x = element_blank(), y = "Solar Irradiance (W/m^2)"
+    ) +
+    scale_fill_brewer(palette = "Oranges") +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+```
+
+Then, by altitude range:
+
+```{r}
+irradiance_merged_altitude <- left_join(
+    irradiance_merged,
+    sensors |> filter(IdSensore %in% irradiance_sensor_ids),
+    by = "IdSensore"
+)
+
+irradiance_merged_altitude$AltitudeRange <- cut(
+    irradiance_merged_altitude$Quota,
+    breaks = seq(0, 3200, by = 800),
+    labels = c("0-800m", "800-1600m", "1600-2400m", "2400-3200m")
+)
+```
+
+```{r}
+irradiance_merged_altitude |>
+    filter(Stato == "VA") |>
+    ggplot(
+        aes(x = AltitudeRange, y = Valore)
+    ) +
+    geom_hline(
+        yintercept = 0, 
+        linetype = "dashed", 
+        color = "#F26D6D"
+    ) +
+    geom_boxplot(
+        aes(fill = AltitudeRange)
+    ) +
+    labs(
+        x = element_blank(), y = "Solar Irradiance (W/m^2)"
+    ) +
+    scale_fill_brewer(palette = "Oranges") +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+```
+
+Some months exhibit some very unusual values for the year period. We're much better off removing them:
+
+```{r}
+irradiance_merged_tmp <- irradiance_merged |>
+    mutate(
+        Month = month(Data, label = TRUE)
+    ) |>
+    mutate(
+        Valore = case_when(
+            Month == "Feb" & Valore > 950 ~ NA,
+            Month == "Aug" & Valore > 1300 ~ NA,
+            TRUE ~ Valore
+        ),
+        Stato = ifelse(is.na(Valore), "NA", Stato)
+    )
+
+irradiance_merged <- irradiance_merged_tmp |>
+    select(IdSensore, Data, Valore, Stato)
+```
+
+## 2.5 Computing daily average per sensor
+
+Let's now compute the daily average for each sensor. First, extract the date from `Data`:
+
+```{r}
+irradiance_daily <- irradiance_merged |>
+    mutate(Data = floor_date(Data, unit = "day"))
+irradiance_daily
+```
+
+Then compute the average readings for each sensor within each day:
+
+```{r}
+irradiance_daily <- irradiance_daily |>
+    group_by(IdSensore, Data) |>
+    summarise(
+        Media = if (all(is.na(Valore))) -999 else round(mean(Valore, na.rm = TRUE)),
+        Min = if (all(is.na(Valore))) -999 else min(Valore, na.rm = TRUE),
+        Max = if (all(is.na(Valore))) -999 else max(Valore, na.rm = TRUE),
+        Obs = n(),
+        .groups = "drop"
+    ) |>
+    mutate(Stato = ifelse(Media == -999, "NA", "VA"))
+irradiance_daily
+```
+
+We'd better check for readings that are way off the others, most likely due to lack of daily observations. Let's plot them first by month:
+
+```{r}
+irradiance_daily |>
+    filter(Stato == "VA") |>
+    mutate(
+        Month = month(Data, label = TRUE)
+    ) |>
+    ggplot(
+        aes(x = Month, y = Media)
+    ) +
+    geom_boxplot(
+        aes(fill = Month)
+    ) +
+    labs(
+        x = element_blank(), y = "Solar Irradiance (W/m^2)"
+    ) +
+    scale_fill_brewer(palette = "Oranges") +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+```
+
+Some months exhibit some very unusual values for the year period. We're much better off removing them:
+
+```{r}
+irradiance_daily_tmp <- irradiance_daily |>
+    mutate(
+        Month = month(Data, label = TRUE)
+    ) |>
+    mutate(
+        Media = case_when(
+            Month == "Aug" & Media > 400 ~ -999,
+            Month == "Oct" & Media > 300 ~ -999,
+            Month %in% c("Jun", "Jul", "Aug") & Media < 20 ~ -999,
+            Media == 0 ~ -999,
+            Obs < 24 ~ -999,
+            TRUE ~ Media
+        ),
+        Min = ifelse(Media == -999, -999, Min),
+        Max = ifelse(Media == -999, -999, Max),
+        Stato = ifelse(Media == -999, "NA", Stato)
+    )
+
+irradiance_daily <- irradiance_daily_tmp |>
+    select(IdSensore, Data, Media, Min, Max, Stato)
+```
+
+## 2.6 Quick inspection and saving
+
+Finally, save the computed solar irradiance daily average in a separate .csv file:
+
+```{r}
+write.csv(
+    irradiance_daily,
+    file = "processed_dataset/Radiazione_Globale_dal_01062023_al_01062024.csv",
+    sep = ",",
+    quote = FALSE,
+    row.names = FALSE
+)
+```

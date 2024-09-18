@@ -1,0 +1,886 @@
+---
+title: "Snow Height Analysis"
+output: html_notebook
+---
+
+# 1. Imports
+
+```{r, include=FALSE}
+library(corrplot)
+library(tidyverse)
+library(sf)
+Sys.setlocale("LC_TIME", "en_US")
+```
+
+## 1.1 Readings datasets
+
+Let's start by importing the processed snow height readings:
+
+```{r}
+snow_readings <- read.csv(
+    "processed_dataset/Altezza_neve_dal_01062023_al_01062024.csv",
+    header = TRUE,
+    strip.white = TRUE,
+    na.strings = c("-999")
+)
+snow_readings
+```
+
+Let's apply some small preprocessing to the imported dataset:
+
+```{r}
+snow_readings <- snow_readings |>
+    mutate(
+        IdSensore = as.factor(IdSensore),
+        Data = ymd(Data),
+        Stato = as.factor(Stato)
+    )
+```
+
+## 1.2 Sensors/stations dataset
+
+We also need the processed Lombardy stations for the analysis:
+
+```{r}
+snow_sensors <- read.csv(
+    "processed_dataset//Stazioni_Idro_Nivo_Meteorologiche.csv",
+    header = TRUE,
+    strip.white = TRUE
+)
+```
+
+Let's apply some small preprocessing to the imported dataset:
+
+```{r}
+snow_sensors <- snow_sensors |>
+    filter(Tipologia == "Altezza Neve") |>
+    mutate(
+        IdSensore = as.factor(IdSensore),
+        Provincia = as.factor(Provincia),
+        NomeProvincia = as.factor(NomeProvincia)
+    )
+```
+
+
+# 2. Time-Coverage Analysis
+
+## 2.1 Analysis by month
+
+Let's try to plot a time-series of readings of each sensor:
+
+```{r}
+snow_readings <- snow_readings |>
+    mutate(
+        Month = factor(
+            month(Data, label=TRUE, abbr=FALSE),
+            levels = c("June", "July", "August", "September", "October", "November", "December", "January", "February", "March", "April", "May")
+        )
+    )
+```
+
+```{r}
+snow_readings |> 
+    filter(Stato == "VA") |>
+    ggplot(
+        aes(x = Data, y = IdSensore)
+    ) + geom_point(
+        aes(color = Month)
+    ) + scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) + labs(
+        x = element_blank(),
+        y = element_blank()
+    ) + theme_minimal() +
+    theme(
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_line(color = "grey90", linetype = "dashed")
+    )
+```
+
+Looks like very few sensors make readings during the summer months, while a good portion of them makes readings in the entire period going from November to June of the following year.
+There are some sensors though that make readings for some small intervals and stop, before resuming for another short interval.
+Some of them even seem to wake up only for a day or two, probably to get just an estimate of the snow height during that period.
+
+## 2.2 Analysis by province
+
+Now let's do the same, but dividing by province. We first need to join both snow height readings and sensors datasets, based on the sensor that makes each reading:
+
+```{r}
+snow_sensor_readings <- left_join(
+    snow_readings,
+    snow_sensors,
+    join_by(IdSensore == IdSensore)
+)
+```
+
+Let's show all time-series on the same graph, with different colors for each province:
+
+```{r}
+snow_time_coverage <- snow_sensor_readings |> 
+    filter(Stato == "VA") |>
+    mutate(
+        NomeProvincia = paste(NomeProvincia, " (", Provincia, ")", sep = "")
+    ) |>
+    ggplot(
+        aes(x = Data, y = IdSensore)
+    ) + 
+    geom_point(
+        aes(color = Month)
+    ) +
+    facet_wrap(
+        . ~ NomeProvincia,
+        ncol = 2,
+        scales = "free_y"
+    ) + 
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) + 
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        color = element_blank(),
+    ) + theme_minimal() +
+    theme(
+        legend.position = "inside",
+        legend.justification = c(1,0), legend.position.inside = c(1,0),
+        legend.direction = "horizontal", legend.byrow = TRUE,
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_line(color = "grey90", linetype = "dashed"),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+
+snow_time_coverage
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/snow_time_coverage.png",
+    plot = snow_time_coverage,
+    width = 20,
+    height = 26,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+The province of Sondrio (SO) has sensors that are operational for most of the year, and also the only ones that make readings during the summer. The provinces of Brescia (BS), Bergamo (BG) and Lecco (LC) also have at least one sensors that stays operational most of the time, while sensors belonging to other provinces are working only during some periods (or at short intervals).
+
+## 2.3 Analysis by altitude
+
+Finally, let's also make a time-series analysis by altitude:
+
+```{r}
+snow_time_coverage_altitude <- snow_sensor_readings |> 
+    filter(Stato == "VA") |>
+    mutate(
+        NomeProvincia = paste(NomeProvincia, " (", Provincia, ")", sep = "")
+    ) |>
+    ggplot(
+        aes(x = Data, y = IdSensore)
+    ) +
+    geom_point(
+        aes(color = Quota)
+    ) +
+    facet_wrap(
+        . ~ NomeProvincia,
+        ncol = 2,
+        scales = "free_y"
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        color = "Altitude"
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "inside",
+        legend.justification = c(1,0), legend.position.inside = c(1,0),
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_line(color = "grey90", linetype = "dashed"),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    ) +
+    scale_color_continuous(type = "viridis")
+
+snow_time_coverage_altitude
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/snow_time_coverage_altitude.png",
+    plot = snow_time_coverage_altitude,
+    width = 20,
+    height = 26,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+As one could easily expect, the sensors at higher altitudes are active for much longer. One interesting thing to notice is that most of this sensors belong to the province of Sondrio (SO), while the other ones with bigger altitudes belong to either Brescia (BS) or Bergamo (BG).
+It's interesting to notice that some sensors at higher altitudes are kept operational for less time than other sensors at smaller altitudes, probably for hydro dangers.
+
+
+# 3. Snow Evolution
+
+## 3.1 Correlation
+
+Let's try to understand what could be related to the evolution of the snow height, by drawing a correlation plot. We first need to compute the correlation matrix on the desired features:
+
+```{r}
+snow_sensor_readings_tmp <- snow_sensor_readings |>
+    filter(Stato == "VA") |>
+    mutate(Month = month(Data)) |>
+    select(
+        Media,
+        Month,
+        Quota,
+        lng,
+        lat
+    )
+
+snow_cor = cor(snow_sensor_readings_tmp, use = "complete.obs")
+```
+
+Finally, we just need to plot the correlation graph:
+
+```{r}
+col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
+
+corrplot(snow_cor, method = "shade", shade.col = NA, tl.col = "black", tl.srt = 45,
+         col = col(200), addCoef.col = "black", cl.pos = "n", order = "AOE")
+```
+
+Looks like there might be a correlation between snow height and the altitude at which the reading is made. Let's see it within a scatterplot:
+
+```{r}
+snow_sensor_readings |>
+    filter(Stato == "VA") |>
+    ggplot(
+        aes(x = Quota, y = Media)
+    ) +
+    geom_point(
+        aes(color = Media)
+    ) +
+    geom_smooth(
+        method = "lm"
+    ) +
+    labs(
+        x = "Average Snow Height (cm)",
+        y = "Altitude (m)"
+    ) +
+    scale_colour_distiller(palette = "Purples") +
+    theme_minimal()
+```
+
+```{r}
+snow_sensor_readings |>
+    filter(
+        Stato == "VA",
+        !(Month %in% c("June", "July", "August", "September"))
+    ) |>
+    ggplot(
+        aes(x = Quota, y = Media)
+    ) +
+    geom_point(
+        aes(color = Media)
+    ) +
+    geom_smooth(
+        method = "lm", se = FALSE,
+        color = "gray20", linetype = "dashed"
+    ) +
+    facet_wrap(
+        . ~ Month,
+        ncol = 3
+    ) +
+    labs(
+        x = "Average Snow Height (cm)",
+        y = "Altitude (m)"
+    ) +
+    theme_minimal() +
+    scale_colour_distiller(palette = "Purples") +
+    theme(
+        legend.position = "inside",
+        legend.justification = c(1,0), legend.position.inside = c(1,0),
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+```
+
+## 3.2 Snow height time-series by sensor
+
+Let's try to analyze the snow height variations during the entire period. We start with the province of **Sondrio**:
+
+```{r}
+snow_depth_SO <- snow_sensor_readings |>
+    filter(Provincia == "SO") |>
+    mutate(
+        SensorLabel = paste(IdSensore, " | ", NomeStazione, " (", Quota, "m)", sep = "")
+    ) |>
+    ggplot(
+        aes(x = Data, y = Media)
+    ) + 
+    geom_area(
+        aes(fill = SensorLabel),
+        alpha = 0.15
+    ) +
+    geom_point(
+        aes(color = SensorLabel),
+        size = 1
+    ) +
+    geom_line(
+        aes(color = SensorLabel)
+    ) +
+    facet_wrap(
+        . ~ SensorLabel,
+        ncol = 2
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    labs(
+        x = element_blank(),
+        y = "Snow Depth (cm)",
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+
+snow_depth_SO
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/snow_depth_SO.jpg",
+    plot = snow_depth_SO,
+    width = 20,
+    height = 26,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+Let's repeat the process for the province of **Brescia**:
+
+```{r}
+snow_depth_BS <- snow_sensor_readings |>
+    filter(Provincia == "BS") |>
+    mutate(
+        SensorLabel = paste(IdSensore, " | ", NomeStazione, " (", Quota, "m)", sep = "")
+    ) |>
+    ggplot(
+        aes(x = Data, y = Media)
+    ) + 
+    geom_area(
+        aes(fill = SensorLabel),
+        alpha = 0.15
+    ) +
+    geom_point(
+        aes(color = SensorLabel),
+        size = 1
+    ) +
+    geom_line(
+        aes(color = SensorLabel)
+    ) +
+    facet_wrap(
+        . ~ SensorLabel,
+        ncol = 2
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    labs(
+        x = element_blank(),
+        y = "Snow Depth (cm)",
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+snow_depth_BS
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/snow_depth_BS.jpg",
+    plot = snow_depth_BS,
+    width = 20,
+    height = 13,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+And with the province of **Bergamo**:
+
+```{r}
+snow_depth_BG <- snow_sensor_readings |>
+    filter(Provincia == "BG") |>
+    mutate(
+        SensorLabel = paste(IdSensore, " | ", NomeStazione, " (", Quota, "m)", sep = "")
+    ) |>
+    ggplot(
+        aes(x = Data, y = Media)
+    ) + 
+    geom_area(
+        aes(fill = SensorLabel),
+        alpha = 0.15
+    ) +
+    geom_point(
+        aes(color = SensorLabel),
+        size = 1
+    ) +
+    geom_line(
+        aes(color = SensorLabel)
+    ) +
+    facet_wrap(
+        . ~ SensorLabel,
+        ncol = 2
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    labs(
+        x = element_blank(),
+        y = "Snow Depth (cm)",
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+snow_depth_BG
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/snow_depth_BG.jpg",
+    plot = snow_depth_BG,
+    width = 20,
+    height = 13,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+Finally, let's do the same in one unique graph for all remaining provinces: **Como**, **Lecco**, **Pavia**, e **Varese**.
+
+```{r}
+snow_height_COPVVA <- snow_sensor_readings |>
+    filter(Provincia %in% c("CO", "PV", "VA")) |>
+    mutate(
+        SensorLabel = paste(IdSensore, " | ", NomeStazione, " (", Quota, "m)", sep = ""),
+        NomeProvincia = paste(NomeProvincia, " (", Provincia, ")", sep = "")
+    ) |>
+    ggplot(
+        aes(x = Data, y = Media)
+    ) + 
+    geom_area(
+        aes(fill = NomeProvincia),
+        alpha = 0.15
+    ) +
+    geom_point(
+        aes(color = NomeProvincia),
+        size = 1
+    ) +
+    geom_line(
+        aes(color = NomeProvincia)
+    ) +
+    facet_wrap(
+        . ~ SensorLabel,
+        ncol = 2
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    labs(
+        x = element_blank(),
+        y = "Snow Depth (cm)",
+        fill = element_blank(),
+    ) +
+    guides(
+        color = "none"
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        axis.text.y = element_text(size = 8),
+        legend.text = element_text(size = 12),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+snow_height_COPVVA
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/snow_depth_COPVVA.jpg",
+    plot = snow_height_COPVVA,
+    width = 20,
+    height = 9,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+## 3.3 Province snow height trend
+
+Compute mean for each province:
+
+```{r}
+monthly_snow_height <- snow_sensor_readings |>
+    mutate(
+        Month = month(Data),
+        Year = year(Data)
+    ) |>
+    group_by(Provincia, NomeProvincia, Month, Year) |>
+    summarise(
+        Media = if (all(is.na(Media))) NA else round(mean(Media, na.rm = TRUE)),
+        Max = if (all(is.na(Max))) NA else max(Max, na.rm = TRUE),
+        Min = if (all(is.na(Min))) NA else min(Min, na.rm = TRUE),
+        .groups = "drop"
+    ) |>
+    mutate(Stato = ifelse(is.na(Media), "NA", "VA"))
+```
+
+Now we just have to plot the monthly trend for each province:
+
+```{r}
+snow_depth_monthly <- monthly_snow_height |>
+    mutate(
+        Data = make_date(Year, Month, day = 1),
+        NomeProvincia = paste(NomeProvincia, " (", Provincia, ")", sep = "")
+    ) |>
+    ggplot(
+        aes(x = Data, y = Media)
+    ) +
+    geom_point(
+        aes(color = NomeProvincia),
+        size = 2
+    ) +
+    geom_line(
+        aes(color = NomeProvincia)
+    ) +
+    geom_smooth(
+        method = "lm", se = FALSE,
+        color = "gray20", linetype = "dashed"
+    ) +
+    facet_wrap(
+        . ~ NomeProvincia,
+        ncol = 3
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    labs(
+        x = element_blank(),
+        y = "Snow Depth (cm)",
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+snow_depth_monthly
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/snow_depth_monthly.jpg",
+    plot = snow_depth_monthly,
+    width = 24,
+    height = 14,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+In case of Sondrio (SO), we can say that the average amount of snow in the province has doubled since the previous year. Despite no data at the beginning of the summer season is available for the other provinces, a noticeable increase in accumulated snow can be said also for Brescia (BS), which has lasted up to the beginning of the summer season. Based on the visible trend, it's very likely that Brescia has increased the amount of available snow from the previous year.
+
+The provinces of Bergamo (BG) and Lecco (LC) show a similar trend, with a peak in March, but both had a drastic decrease in average snow height entering the new summer season. They are much more likely to be stable compared to the previous year, or at least to have had an overall slight increase.
+
+The other provinces show a flat trend overall, which might suggest they even reduced the snow height compared to the previous year.
+
+## 3.4 Region snow depth trend
+
+Let's visualize the average monthly snow trend for the entire region:
+
+```{r}
+snow_region_monthly <- monthly_snow_height |>
+    group_by(Month, Year) |>
+    summarise(
+        Totale = if (all(is.na(Media))) NA else sum(Media, na.rm = TRUE),
+        Max = if (all(is.na(Max))) NA else max(Max, na.rm = TRUE),
+        Min = if (all(is.na(Min))) NA else min(Min, na.rm = TRUE),
+        .groups = "drop"
+    ) |>
+    mutate(Stato = ifelse(is.na(Totale), "NA", "VA"))
+```
+
+```{r}
+snow_region_monthly |>
+    filter(Stato == "VA") |>
+    mutate(
+        Data = make_date(Year, Month, day = 1)
+    ) |>
+    ggplot(
+        aes(x = Data, y = Totale)
+    ) +
+    geom_smooth(
+        method = "lm", se = FALSE,
+        color = "gray20", linetype = "dashed"
+    ) +
+    geom_point(
+        size = 2
+    ) +
+    geom_line() +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    labs(
+        x = element_blank(),
+        y = "Snow Depth (cm)",
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank()
+    )
+```
+
+This graph shows the sum of snow depth monthly averages recorded by multiple sensors
+
+## 3.5 Altitude snow height trend
+
+Let's try to plot a boxplot of snow height over altitude:
+
+```{r}
+snow_sensor_readings$AltitudeRange <- cut(
+    snow_sensor_readings$Quota,
+    breaks = seq(0, 3200, by = 800),
+    labels = c("0-800m", "800-1600m", "1600-2400m", "2400-3200m")
+)
+
+snow_altitude_periods <- snow_sensor_readings |>
+    filter(
+        Stato == "VA",
+        !(Month %in% c("June", "July", "August", "September"))
+    ) |>
+    ggplot(
+        aes(x = AltitudeRange, y = Media)
+    ) +
+    geom_boxplot(
+        aes(fill = AltitudeRange)
+    ) +
+    facet_wrap(
+        . ~ Month,
+        ncol = 3
+    ) +
+    labs(
+        x = element_blank(), y = "Snow Depth (cm)"
+    ) +
+    scale_fill_brewer(palette = "Purples") +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+snow_altitude_periods
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/snow_altitude_periods.jpg",
+    plot = snow_altitude_periods,
+    width = 24,
+    height = 14,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+A strong relationship can be seen between snow height and altitude (as anyone could expect). Higher altitudes tend to accumulate more snow over time, compared to lower altitudes.
+
+Let's try to compute the monthly average for each sensor:
+
+```{r}
+monthly_snow_height <- snow_sensor_readings |>
+    mutate(
+        Month = month(Data),
+        Year = year(Data)
+    ) |>
+    group_by(IdSensore, NomeStazione, Quota, Month, Year) |>
+    summarise(
+        Media = if (all(is.na(Media))) NA else round(mean(Media, na.rm = TRUE)),
+        Max = if (all(is.na(Max))) NA else max(Max, na.rm = TRUE),
+        Min = if (all(is.na(Min))) NA else min(Min, na.rm = TRUE),
+        .groups = "drop"
+    ) |>
+    mutate(Stato = ifelse(is.na(Media), "NA", "VA"))
+```
+
+Finally, let's plot the time-series at different altitude ranges:
+
+```{r}
+monthly_snow_height$AltitudeRange <- cut(
+    monthly_snow_height$Quota,
+    breaks = seq(0, 3200, by = 800),
+    labels = c("0-800m", "800-1600m", "1600-2400m", "2400-3200m")
+)
+
+snow_altitude_sensors <- monthly_snow_height |>
+    filter(Stato == "VA") |>
+    mutate(
+        Data = make_date(Year, Month, day = 1)
+    ) |>
+    ggplot(
+        aes(x = Data, y = Media)
+    ) +
+    geom_density(
+        stat = "identity",
+        aes(color = IdSensore, fill = IdSensore),
+        alpha = 0.15
+    ) +
+    facet_wrap(
+        . ~ AltitudeRange,
+        ncol = 3
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    labs(
+        x = element_blank(),
+        y = "Average Snow Depth (cm)",
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+snow_altitude_sensors
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/snow_altitude_sensors.jpg",
+    plot = snow_altitude_sensors,
+    width = 24,
+    height = 8,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+Finally, let's visualize the sum of average monthly snow depths for each altitude range:
+
+```{r}
+snow_altitude_monthly <- monthly_snow_height |>
+    group_by(Month, Year, AltitudeRange) |>
+    summarise(
+        Media = if (all(is.na(Media))) NA else round(mean(Media, na.rm = TRUE)),
+        Max = if (all(is.na(Max))) NA else max(Max, na.rm = TRUE),
+        Min = if (all(is.na(Min))) NA else min(Min, na.rm = TRUE),
+        .groups = "drop"
+    ) |>
+    mutate(Stato = ifelse(is.na(Media), "NA", "VA"))
+```
+
+```{r}
+snow_depth_altitude_monthly <- snow_altitude_monthly |>
+    filter(Stato == "VA") |>
+    mutate(
+        Data = make_date(Year, Month, day = 1)
+    ) |>
+    ggplot(
+        aes(x = Data, y = Media)
+    ) +
+    geom_density(
+        stat = "identity",
+        aes(color = AltitudeRange, fill = AltitudeRange),
+        alpha = 0.15
+    ) +
+    geom_point(
+        aes(color = AltitudeRange),
+        size = 2
+    ) +
+    facet_wrap(
+        . ~ AltitudeRange,
+        ncol = 3
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    labs(
+        x = element_blank(),
+        y = "Average Snow Height (cm)",
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+snow_depth_altitude_monthly
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/snow_depth_altitude_monthly.jpg",
+    plot = snow_depth_altitude_monthly,
+    width = 24,
+    height = 6,
+    dpi = 300,
+    units = "cm"
+)
+```

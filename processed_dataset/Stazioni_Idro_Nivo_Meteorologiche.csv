@@ -1,0 +1,573 @@
+IdSensore,Tipologia,Unità.DiMisura,IdStazione,NomeStazione,Quota,Provincia,DataStart,DataStop,Storico,lng,lat,NomeProvincia
+8155,Precipitazione,mm,817,Pavia SS 35,71,PV,04/05/2000,,N,9.14666412,45.18062204,Pavia
+9117,Precipitazione,mm,1202,Vercana,980,CO,01/01/2004,,N,9.32468906,46.18185467,Como
+32373,Umidità Relativa,%,1679,Sormano rifugio Alpetto,1158,CO,23/11/2017,,N,9.23506881,45.90514139,Como
+14724,Precipitazione,mm,1545,San Siro Alpe Rescascìa,1285,CO,30/12/2014,,N,9.2383327,46.0719452,Como
+17533,Umidità Relativa,%,3,Sondalo Le Prese,950,SO,07/01/2019,,N,10.35482014,46.35017631,Sondrio
+2435,Radiazione Globale,W/m²,132,Bergamo v.Stezzano,211,BG,01/01/1993,,N,9.65876847,45.66051928,Bergamo
+19445,Radiazione Globale,W/m²,1659,Mornico al Serio campo sportivo,162,BG,14/04/2017,,N,9.801961,45.593154,Bergamo
+14567,Precipitazione,mm,1378,Tignale Oldesio,374,BS,23/07/2013,,N,10.7209063,45.7326393,Brescia
+8161,Precipitazione,mm,889,Torre Boldone,311,BG,21/11/2001,,N,9.71018546,45.71897778,Bergamo
+9785,Radiazione Globale,W/m²,846,Edolo Pantano d`Avio,2108,BS,01/05/1993,,N,10.47282844,46.17700799,Brescia
+22023,Temperatura,°C,1891,Porto Valtravaglia San Michele,875,VA,30/01/2020,,N,8.71373858,45.94458167,Varese
+9863,Precipitazione,mm,672,Cornale v.Libertà,74,PV,28/07/2005,,N,8.91415717,45.04008561,Pavia
+6430,Radiazione Globale,W/m²,595,Filago v.Don Milani,190,BG,07/12/1991,,N,9.55609572,45.63387247,Bergamo
+8168,Temperatura,°C,885,Arcisate,383,VA,05/07/2000,,N,8.89055144,45.84610806,Varese
+32391,Temperatura,°C,1555,Manerba del Garda Dusano,73,BS,15/11/2017,,N,10.56663509,45.543701,Brescia
+7029,Temperatura,°C,687,Ferno v.Di Dio,215,VA,05/11/2006,,N,8.75697656,45.61924753,Varese
+14766,Temperatura,°C,1553,Mozzanica v.Donizetti,104,BG,20/07/2015,,N,9.68248866,45.47736192,Bergamo
+8587,Precipitazione,mm,998,Laveno-Mombello p.zza Matteotti,207,VA,24/06/1999,,N,8.61868535,45.90991335,Varese
+14587,Temperatura,°C,1379,Gargnano,984,BS,15/07/2015,,N,10.61740677,45.72996009,Brescia
+70,Altezza Neve,cm,35,Caspoggio Piazzo Cavalli,1719,SO,27/10/1989,,N,9.870887,46.249872,Sondrio
+2103,Precipitazione,mm,107,Sondrio Fond.Fojanini,307,SO,29/01/2001,,N,9.85094015,46.16755337,Sondrio
+8024,Altezza Neve,cm,847,Carona Carisole,1954,BG,27/09/1993,,N,9.79379959,46.03852339,Bergamo
+8140,Temperatura,°C,876,Caino,428,BS,01/02/2001,,N,10.32222392,45.60972056,Brescia
+8170,Precipitazione,mm,819,Lozio,994,BS,21/11/2001,,N,10.25975254,45.98580874,Brescia
+32399,Altezza Neve,cm,1680,Vilminore di Scalve Presolana,1856,BG,15/11/2017,,N,10.041578,45.98117244,Bergamo
+14131,Precipitazione,mm,1329,Lavena Ponte Tresa via della Boschiva,269,VA,18/04/2012,,N,8.85024227,45.9716903,Varese
+4035,Umidità Relativa,%,144,Madesimo Spluga,1915,SO,19/11/2000,,N,9.34812808,46.47166446,Sondrio
+58,Temperatura,°C,35,Caspoggio Piazzo Cavalli,1719,SO,27/10/1989,,N,9.870887,46.249872,Sondrio
+32401,Temperatura,°C,1680,Vilminore di Scalve Presolana,1856,BG,15/11/2017,,N,10.041578,45.98117244,Bergamo
+19342,Temperatura,°C,1556,Prata Camportaccio Pratella,1035,SO,03/12/2015,,N,9.413906,46.292608,Sondrio
+2097,Umidità Relativa,%,107,Sondrio Fond.Fojanini,307,SO,29/01/2001,,N,9.85094015,46.16755337,Sondrio
+17501,Radiazione Globale,W/m²,817,Pavia SS 35,71,PV,21/10/2018,,N,9.14666412,45.18062204,Pavia
+9386,Umidità Relativa,%,1221,Casnigo Campo Sportivo,502,BG,18/12/2008,,N,9.86559107,45.81136488,Bergamo
+14072,Umidità Relativa,%,1325,Collio Memmo,1069,BS,15/03/2012,,N,10.31552778,45.81136111,Brescia
+14171,Precipitazione,mm,1341,Bosisio Parini Imbarcadero,266,LC,27/10/2012,,N,9.28691933,45.80353008,Lecco
+8197,Precipitazione,mm,911,Lambrugo,273,CO,06/03/2003,,N,9.24444953,45.76194769,Como
+9042,Altezza Neve,cm,1220,Ponte di Legno Case Pirli,1640,BS,01/01/2004,,N,10.5310511,46.28969035,Brescia
+2465,Precipitazione,mm,134,Corzano Bargnano,93,BS,03/05/1998,,N,10.03902737,45.43372847,Brescia
+19023,Umidità Relativa,%,1422,Bergamo v.Maffei,249,BG,01/10/2013,,N,9.67466286,45.69520255,Bergamo
+17476,Radiazione Globale,W/m²,1420,Gordona,1362,SO,26/09/2018,,N,9.33920315,46.29151911,Sondrio
+22026,Umidità Relativa,%,1891,Porto Valtravaglia San Michele,875,VA,30/01/2020,,N,8.71373858,45.94458167,Varese
+11011,Umidità Relativa,%,912,Foppolo,1682,BG,22/11/2010,,N,9.75610761,46.04249594,Bergamo
+9030,Temperatura,°C,1218,Ardesio Valcanale,1002,BG,01/01/2004,,N,9.863434,45.95056364,Bergamo
+2401,Umidità Relativa,%,129,Capo di Ponte v.Briscioli,362,BS,30/10/2002,,N,10.3425026,46.02656354,Brescia
+6795,Temperatura,°C,653,Brescia v.Ziziola,125,BS,17/10/1997,,N,10.21846492,45.51456611,Brescia
+32357,Radiazione Globale,W/m²,1807,Ispra JRC,249,VA,21/04/2022,,N,8.6365627,45.80595188,Varese
+14664,Precipitazione,mm,1383,Sarezzo v.della Fonte,290,BS,02/11/2012,,N,10.1870962,45.66779897,Brescia
+2385,Precipitazione,mm,127,Casatenovo tetto,360,LC,10/11/2003,,N,9.30914481,45.70194614,Lecco
+14569,Umidità Relativa,%,1378,Tignale Oldesio,374,BS,23/07/2013,,N,10.7209063,45.7326393,Brescia
+9786,Radiazione Globale,W/m²,847,Carona Carisole,1954,BG,01/07/1993,,N,9.79379959,46.03852339,Bergamo
+2110,Temperatura,°C,108,Samolaco v.Vignola,206,SO,27/07/1994,,N,9.42666579,46.23610858,Sondrio
+121,Temperatura,°C,60,Villa di Chiavenna,665,SO,20/11/2002,,N,9.51204364,46.33199472,Sondrio
+2447,Temperatura,°C,133,Bema,958,SO,01/01/1993,,N,9.5693423,46.10552765,Sondrio
+4027,Umidità Relativa,%,143,Livigno Passo Foscagno,2320,SO,02/06/2002,,N,10.20748854,46.49442378,Sondrio
+6834,Temperatura,°C,657,Lonato del Garda v.del Marchesino,180,BS,01/01/1990,,N,10.48078183,45.46375819,Brescia
+17429,Radiazione Globale,W/m²,1862,Broni,77,PV,22/03/2018,,N,9.22386082,45.04448039,Pavia
+9015,Temperatura,°C,1229,Gandellino Grabiasca,738,BG,01/01/2004,,N,9.94787769,46.00767519,Bergamo
+10551,Temperatura,°C,554,Saronno v.Santuario,212,VA,06/07/2010,,N,9.02640138,45.62735705,Varese
+11228,Radiazione Globale,W/m²,1075,Edolo Centrale ENEL,659,BS,20/12/2011,,N,10.34047351,46.1690708,Brescia
+2612,Umidità Relativa,%,212,Canzo,1233,CO,26/11/2008,,N,9.31813681,45.84814356,Como
+14451,Radiazione Globale,W/m²,1366,Porlezza torrente,291,CO,12/12/2012,,N,9.14079938,46.03777316,Como
+9104,Precipitazione,mm,1229,Gandellino Grabiasca,738,BG,01/01/2004,,N,9.94787769,46.00767519,Bergamo
+2408,Precipitazione,mm,129,Capo di Ponte v.Briscioli,362,BS,30/10/2002,,N,10.3425026,46.02656354,Brescia
+11021,Umidità Relativa,%,1224,Cortenova,456,LC,22/12/2010,,N,9.38040375,46.00746603,Lecco
+9116,Precipitazione,mm,1206,Cavaria con Premezzo v. Cantalupa,274,VA,01/01/2004,,N,8.80769797,45.68949617,Varese
+19390,Precipitazione,mm,1650,Bormio eliporto,1172,SO,12/01/2017,,N,10.36603171,46.45370081,Sondrio
+9103,Precipitazione,mm,1237,Monno,1728,BS,11/10/2004,,N,10.308807,46.25030272,Brescia
+2082,Temperatura,°C,106,Varzi Nivione,500,PV,15/05/2001,,N,9.17949163,44.80739989,Pavia
+11216,Temperatura,°C,1202,Vercana,980,CO,11/11/2011,,N,9.32468906,46.18185467,Como
+14385,Radiazione Globale,W/m²,1360,Clusone SP 671,564,BG,14/11/2012,,N,9.93314133,45.88094706,Bergamo
+17600,Precipitazione,mm,1889,Val Masino Merdarola,2280,SO,01/08/2019,,N,9.58163635,46.22931619,Sondrio
+19307,Temperatura,°C,1518,Dubino La Piazza,993,SO,21/11/2014,,N,9.45812983,46.16725553,Sondrio
+24416,Precipitazione,mm,1974,Grone San Fermo,1246,BG,30/08/2020,,N,9.93587297,45.74415628,Bergamo
+116,Precipitazione,mm,58,Carona Lago Fregabolgia,1955,BG,01/01/2002,,N,9.86305936,46.02444861,Bergamo
+4042,Temperatura,°C,145,Darfo Boario Terme,222,BS,04/12/2002,18/07/2023,S,10.1773568,45.8746021,Brescia
+14627,Umidità Relativa,%,1206,Cavaria con Premezzo v. Cantalupa,274,VA,10/04/2013,,N,8.80769797,45.68949617,Varese
+8027,Temperatura,°C,848,Livigno La Vallaccia,2660,SO,11/09/1993,,N,10.18873661,46.47730866,Sondrio
+9,Precipitazione,mm,3,Sondalo Le Prese,950,SO,24/11/1987,,N,10.35482014,46.35017631,Sondrio
+2461,Radiazione Globale,W/m²,134,Corzano Bargnano,93,BS,12/09/2003,,N,10.03902737,45.43372847,Brescia
+14148,Radiazione Globale,W/m²,1325,Collio Memmo,1069,BS,18/04/2012,,N,10.31552778,45.81136111,Brescia
+22003,Temperatura,°C,1890,Tavernole sul Mella Monte Guglielmo,1790,BS,14/10/2019,,N,10.17540709,45.75389593,Brescia
+14257,Temperatura,°C,1346,Campodolcino Alpe Motta,1880,SO,17/10/2012,,N,9.36883561,46.42312151,Sondrio
+8209,Temperatura,°C,910,Manerbio v.Dante,60,BS,09/04/2003,,N,10.14555158,45.35975344,Brescia
+14001,Umidità Relativa,%,1077,Oltre il Colle Zambla,1138,BG,13/01/2012,,N,9.78893967,45.89119304,Bergamo
+17592,Altezza Neve,cm,1889,Val Masino Merdarola,2280,SO,21/12/2007,,N,9.58163635,46.22931619,Sondrio
+17477,Radiazione Globale,W/m²,857,Santa Margherita di Staffora Passo del Giovà,1363,PV,28/09/2018,,N,9.21663743,44.6837785,Pavia
+17528,Radiazione Globale,W/m²,1555,Manerba del Garda Dusano,73,BS,21/10/2018,,N,10.56663509,45.543701,Brescia
+6850,Umidità Relativa,%,659,Odolo v.Praes,349,BS,01/01/1999,,N,10.38929672,45.64605175,Brescia
+9019,Temperatura,°C,1201,Canevino,455,PV,01/01/2004,,N,9.275674,44.93479528,Pavia
+19026,Precipitazione,mm,1422,Bergamo v.Maffei,249,BG,01/10/2013,,N,9.67466286,45.69520255,Bergamo
+5858,Precipitazione,mm,596,Osio Sotto v.per Levate,182,BG,04/04/2000,,N,9.61173782,45.62055568,Bergamo
+14180,Radiazione Globale,W/m²,1342,Ponte in Valtellina Lago Reguzzo,2440,SO,13/10/2012,,N,9.96999939,46.09651358,Sondrio
+8219,Precipitazione,mm,897,Busto Arsizio v.Rossini,242,VA,26/03/2003,,N,8.82388414,45.62639047,Varese
+19343,Umidità Relativa,%,1556,Prata Camportaccio Pratella,1035,SO,03/12/2015,,N,9.413906,46.292608,Sondrio
+32363,Radiazione Globale,W/m²,832,Lanzada Palù,2151,SO,12/10/2017,,N,9.88452786,46.2929069,Sondrio
+12724,Precipitazione,mm,1899,Bereguardo Fornasetta,95,PV,11/08/2020,,N,9.02191087,45.26278148,Pavia
+8098,Precipitazione,mm,823,Piazza Brembana vivaio,510,BG,01/01/1998,,N,9.67277767,45.94611233,Bergamo
+9003,Temperatura,°C,1212,Castione della Presolana,1180,BG,01/01/2004,,N,10.06332908,45.92845581,Bergamo
+4041,Precipitazione,mm,144,Madesimo Spluga,1915,SO,19/11/2000,,N,9.34812808,46.47166446,Sondrio
+24408,Temperatura,°C,1974,Grone San Fermo,1246,BG,30/08/2020,,N,9.93587297,45.74415628,Bergamo
+5871,Temperatura,°C,564,Erba v. Battisti,279,CO,21/02/2009,,N,9.2217792,45.8085738,Como
+6819,Precipitazione,mm,656,Gambara v.Parma,47,BS,01/01/1990,,N,10.29913,45.24955194,Brescia
+14351,Umidità Relativa,%,1359,Breno Lago Della Vacca,2410,BS,09/12/2012,,N,10.4427287,45.95749967,Brescia
+4018,Umidità Relativa,%,142,Caiolo,274,SO,24/05/2002,,N,9.79251888,46.15492316,Sondrio
+19356,Precipitazione,mm,1561,Porto Ceresio campo sportivo,275,VA,23/12/2016,,N,8.89259411,45.89770026,Varese
+10382,Radiazione Globale,W/m²,706,Lecco v.Sora,272,LC,31/07/2008,,N,9.39995481,45.86375372,Lecco
+14130,Temperatura,°C,1329,Lavena Ponte Tresa via della Boschiva,269,VA,18/04/2012,,N,8.85024227,45.9716903,Varese
+8021,Precipitazione,mm,846,Edolo Pantano d`Avio,2108,BS,01/05/1993,,N,10.47282844,46.17700799,Brescia
+8150,Precipitazione,mm,884,Cuveglio,294,VA,06/07/2000,,N,8.74277458,45.90332947,Varese
+2147,Umidità Relativa,%,111,Cassina Valsassina Moggio,1234,LC,01/01/2002,,N,9.49750222,45.91309369,Lecco
+2152,Precipitazione,mm,111,Cassina Valsassina Moggio,1234,LC,01/01/2002,,N,9.49750222,45.91309369,Lecco
+2089,Precipitazione,mm,106,Varzi Nivione,500,PV,15/05/2001,,N,9.17949163,44.80739989,Pavia
+12754,Umidità Relativa,%,28,Chiesa in Valmalenco Alpe Entova,1905,SO,18/11/2020,,N,9.83412892,46.32141817,Sondrio
+8169,Precipitazione,mm,820,Pisogne,842,BS,21/11/2001,,N,10.1569491,45.81611569,Brescia
+9109,Precipitazione,mm,1222,Cavargna,1100,CO,09/04/2004,,N,9.11084686,46.09155206,Como
+14446,Umidità Relativa,%,1366,Porlezza torrente,291,CO,12/12/2012,,N,9.14079938,46.03777316,Como
+12745,Altezza Neve,cm,857,Santa Margherita di Staffora Passo del Giovà,1363,PV,01/12/2020,,N,9.21663743,44.6837785,Pavia
+4034,Temperatura,°C,144,Madesimo Spluga,1915,SO,19/11/2000,,N,9.34812808,46.47166446,Sondrio
+8123,Temperatura,°C,867,Caslino d'Erba v. 4 novembre,427,CO,24/07/1998,,N,9.23237261,45.83539031,Como
+8226,Precipitazione,mm,904,Paisco Loveno,816,BS,20/06/2003,,N,10.29694303,46.07861336,Brescia
+6835,Umidità Relativa,%,657,Lonato del Garda v.del Marchesino,180,BS,01/01/1999,,N,10.48078183,45.46375819,Brescia
+6431,Radiazione Globale,W/m²,594,Bergamo v.Goisis,290,BG,13/09/1996,,N,9.68896994,45.71591825,Bergamo
+8134,Temperatura,°C,820,Pisogne,842,BS,21/11/2001,,N,10.1569491,45.81611569,Brescia
+10661,Umidità Relativa,%,1898,Valganna Mondonico,665,VA,18/05/2020,,N,8.8106663,45.91491984,Varese
+8220,Temperatura,°C,897,Busto Arsizio v.Rossini,242,VA,26/03/2003,,N,8.82388414,45.62639047,Varese
+14728,Umidità Relativa,%,1545,San Siro Alpe Rescascìa,1285,CO,30/12/2014,,N,9.2383327,46.0719452,Como
+14242,Temperatura,°C,1345,Piazzatorre,966,BG,13/10/2012,,N,9.69328479,45.99338359,Bergamo
+14405,Radiazione Globale,W/m²,1365,Bione,911,BS,18/11/2012,,N,10.32736288,45.66721826,Brescia
+19402,Umidità Relativa,%,1652,Tirano eliporto,481,SO,07/12/2016,,N,10.18226719,46.2181778,Sondrio
+32336,Umidità Relativa,%,905,Cevo,1128,BS,11/08/2016,,N,10.37778231,46.08055608,Brescia
+32339,Umidità Relativa,%,857,Santa Margherita di Staffora Passo del Giovà,1363,PV,02/09/2016,,N,9.21663743,44.6837785,Pavia
+8228,Precipitazione,mm,907,Varese v.Appiani,416,VA,27/08/2003,,N,8.82361133,45.83249661,Varese
+5865,Temperatura,°C,596,Osio Sotto v.per Levate,182,BG,04/04/2000,,N,9.61173782,45.62055568,Bergamo
+14280,Precipitazione,mm,1347,Barzio Piani di Bobbio,1713,LC,14/10/2012,,N,9.50113918,45.95949713,Lecco
+8029,Precipitazione,mm,848,Livigno La Vallaccia,2660,SO,11/09/1993,,N,10.18873661,46.47730866,Sondrio
+32398,Precipitazione,mm,1680,Vilminore di Scalve Presolana,1856,BG,15/11/2017,,N,10.041578,45.98117244,Bergamo
+4050,Temperatura,°C,146,Mezzoldo Passo S.Marco,1824,BG,30/05/2003,,N,9.62865186,46.0382628,Bergamo
+9041,Altezza Neve,cm,1230,San Giacomo Filippo Lago Truzzo,2064,SO,09/01/2004,,N,9.31999148,46.36053879,Sondrio
+6159,Umidità Relativa,%,596,Osio Sotto v.per Levate,182,BG,04/04/2000,,N,9.61173782,45.62055568,Bergamo
+4053,Radiazione Globale,W/m²,146,Mezzoldo Passo S.Marco,1824,BG,19/09/2003,,N,9.62865186,46.0382628,Bergamo
+14075,Temperatura,°C,1325,Collio Memmo,1069,BS,15/03/2012,,N,10.31552778,45.81136111,Brescia
+8093,Altezza Neve,cm,832,Lanzada Palù,2151,SO,01/01/1992,,N,9.88452786,46.2929069,Sondrio
+2278,Precipitazione,mm,119,San Giovanni Bianco Cornalita,622,BG,07/09/2001,,N,9.63912077,45.86969697,Bergamo
+8122,Precipitazione,mm,867,Caslino d'Erba v. 4 novembre,427,CO,24/07/1998,,N,9.23237261,45.83539031,Como
+11158,Umidità Relativa,%,1230,San Giacomo Filippo Lago Truzzo,2064,SO,30/09/2011,,N,9.31999148,46.36053879,Sondrio
+32259,Umidità Relativa,%,832,Lanzada Palù,2151,SO,27/10/2016,,N,9.88452786,46.2929069,Sondrio
+11144,Temperatura,°C,143,Livigno Passo Foscagno,2320,SO,08/09/2011,,N,10.20748854,46.49442378,Sondrio
+12728,Radiazione Globale,W/m²,1974,Grone San Fermo,1246,BG,30/08/2020,,N,9.93587297,45.74415628,Bergamo
+14279,Altezza Neve,cm,1347,Barzio Piani di Bobbio,1713,LC,15/10/2012,,N,9.50113918,45.95949713,Lecco
+2146,Temperatura,°C,111,Cassina Valsassina Moggio,1234,LC,01/01/2002,,N,9.49750222,45.91309369,Lecco
+9387,Umidità Relativa,%,1212,Castione della Presolana,1180,BG,29/01/2009,,N,10.06332908,45.92845581,Bergamo
+9396,Umidità Relativa,%,1201,Canevino,455,PV,17/12/2008,,N,9.275674,44.93479528,Pavia
+9011,Temperatura,°C,1230,San Giacomo Filippo Lago Truzzo,2064,SO,09/01/2004,,N,9.31999148,46.36053879,Sondrio
+8163,Precipitazione,mm,859,Luino v. Piero Chiara,205,VA,05/07/2000,,N,8.74272325,46.00414283,Varese
+9037,Altezza Neve,cm,1077,Oltre il Colle Zambla,1138,BG,28/10/2012,,N,9.78893967,45.89119304,Bergamo
+19442,Umidità Relativa,%,1659,Mornico al Serio campo sportivo,162,BG,14/04/2017,,N,9.801961,45.593154,Bergamo
+14603,Radiazione Globale,W/m²,1379,Gargnano,984,BS,15/07/2015,,N,10.61740677,45.72996009,Brescia
+14089,Umidità Relativa,%,1326,Toscolano-Maderno,70,BS,22/03/2012,,N,10.61687842,45.63641172,Brescia
+8104,Temperatura,°C,851,Treviso Bresciano Cavacca,1147,BS,01/01/1998,,N,10.49916675,45.72416486,Brescia
+14684,Temperatura,°C,1420,Gordona,1362,SO,20/03/2014,,N,9.33920315,46.29151911,Sondrio
+8583,Precipitazione,mm,999,Laveno-Mombello Poggio S.Elsa,950,VA,23/06/1999,,N,8.63818571,45.91099372,Varese
+8201,Precipitazione,mm,858,Santa Margherita di Staffora Casanova,575,PV,01/01/2003,,N,9.23905083,44.76803261,Pavia
+32382,Precipitazione,mm,1679,Sormano rifugio Alpetto,1158,CO,28/11/2017,,N,9.23506881,45.90514139,Como
+22011,Precipitazione,mm,1890,Tavernole sul Mella Monte Guglielmo,1790,BS,14/10/2019,,N,10.17540709,45.75389593,Brescia
+11190,Umidità Relativa,%,846,Edolo Pantano d`Avio,2108,BS,06/11/2011,,N,10.47282844,46.17700799,Brescia
+2597,Umidità Relativa,%,205,Montevecchia cascina Butto,385,LC,06/10/2014,,N,9.38387611,45.70480511,Lecco
+9390,Umidità Relativa,%,1216,Valbondione,1784,BG,01/12/2000,,N,10.03860694,46.06456797,Bergamo
+9311,Umidità Relativa,%,646,Como Villa Gallia,201,CO,01/01/1999,,N,9.06697886,45.81504217,Como
+9091,Precipitazione,mm,1211,Castronno,379,VA,01/01/2004,,N,8.82076322,45.74873297,Varese
+14145,Umidità Relativa,%,1330,Olgiate Comasco v.Repubblica,400,CO,18/04/2012,,N,8.97262961,45.77306208,Como
+8015,Precipitazione,mm,833,Gerola Alta Pescegallo,1875,SO,01/01/1992,,N,9.57112074,46.0261969,Sondrio
+5856,Precipitazione,mm,595,Filago v.Don Milani,190,BG,07/12/1991,,N,9.55609572,45.63387247,Bergamo
+19365,Precipitazione,mm,1559,Dervio v.S.Cecilia,198,LC,03/05/2016,,N,9.30538273,46.06896591,Lecco
+8165,Precipitazione,mm,870,Como viale Geno,200,CO,05/07/2000,,N,9.07990936,45.82025397,Como
+14528,Temperatura,°C,1375,Varano Borghi,241,VA,27/03/2013,,N,8.71232365,45.76639371,Varese
+8095,Precipitazione,mm,912,Foppolo,1682,BG,01/01/1998,,N,9.75610761,46.04249594,Bergamo
+19397,Radiazione Globale,W/m²,1650,Bormio eliporto,1172,SO,29/09/2016,,N,10.36603171,46.45370081,Sondrio
+19294,Umidità Relativa,%,1514,Carenno centro sportivo,633,LC,08/05/2018,,N,9.46596925,45.8009939,Lecco
+14517,Precipitazione,mm,1372,Garzeno,581,CO,25/07/2013,,N,9.2478209,46.1321526,Como
+10373,Precipitazione,mm,687,Ferno v.Di Dio,215,VA,13/08/2007,,N,8.75697656,45.61924753,Varese
+32355,Precipitazione,mm,1807,Ispra JRC,249,VA,21/04/2022,,N,8.6365627,45.80595188,Varese
+8097,Precipitazione,mm,822,Valtorta,982,BG,01/01/1998,,N,9.53889086,45.97360719,Bergamo
+14191,Umidità Relativa,%,1342,Ponte in Valtellina Lago Reguzzo,2440,SO,13/10/2012,,N,9.96999939,46.09651358,Sondrio
+8229,Temperatura,°C,907,Varese v.Appiani,416,VA,27/08/2003,,N,8.82361133,45.83249661,Varese
+2459,Temperatura,°C,134,Corzano Bargnano,93,BS,03/05/1998,,N,10.03902737,45.43372847,Brescia
+22579,Umidità Relativa,%,1955,Magasa Malga Corva,1244,BS,01/06/2023,,N,10.6275831109109,45.7740906088109,Brescia
+122,Precipitazione,mm,60,Villa di Chiavenna,665,SO,20/11/2002,,N,9.51204364,46.33199472,Sondrio
+14645,Temperatura,°C,1382,Veddasca Monte Cadrigna,1302,VA,19/07/2013,,N,8.76881513,46.07182708,Varese
+14092,Temperatura,°C,1326,Toscolano-Maderno,70,BS,22/03/2012,,N,10.61687842,45.63641172,Brescia
+8166,Temperatura,°C,870,Como viale Geno,200,CO,05/07/2000,,N,9.07990936,45.82025397,Como
+2195,Precipitazione,mm,114,Landriano Cascina Marianna,88,PV,29/09/2005,,N,9.26715311,45.32059361,Pavia
+6158,Umidità Relativa,%,594,Bergamo v.Goisis,290,BG,13/09/1996,,N,9.68896994,45.71591825,Bergamo
+11008,Umidità Relativa,%,822,Valtorta,982,BG,10/11/2010,,N,9.53889086,45.97360719,Bergamo
+14606,Temperatura,°C,1380,Tremezzo,309,CO,18/04/2013,,N,9.2140589,45.9877167,Como
+6694,Precipitazione,mm,642,Pavia v. Folperti,77,PV,01/06/2002,,N,9.16464919,45.19468231,Pavia
+14568,Temperatura,°C,1378,Tignale Oldesio,374,BS,23/07/2013,,N,10.7209063,45.7326393,Brescia
+8019,Temperatura,°C,846,Edolo Pantano d`Avio,2108,BS,01/05/1993,,N,10.47282844,46.17700799,Brescia
+9013,Temperatura,°C,1220,Ponte di Legno Case Pirli,1640,BS,01/01/2004,,N,10.5310511,46.28969035,Brescia
+46,Precipitazione,mm,33,Lanzada Ganda,988,SO,10/11/1989,,N,9.884505,46.270224,Sondrio
+8016,Temperatura,°C,836,Aprica,1950,SO,01/01/1992,,N,10.14826598,46.12968795,Sondrio
+9308,Precipitazione,mm,646,Como Villa Gallia,201,CO,01/01/1999,,N,9.06697886,45.81504217,Como
+19430,Radiazione Globale,W/m²,1657,Mariano Comense campo sportivo,255,CO,11/10/2017,,N,9.177773,45.684884,Como
+6698,Temperatura,°C,642,Pavia v. Folperti,77,PV,01/06/2002,,N,9.16464919,45.19468231,Pavia
+2270,Temperatura,°C,119,San Giovanni Bianco Cornalita,622,BG,07/09/2001,,N,9.63912077,45.86969697,Bergamo
+8009,Altezza Neve,cm,835,Valdisotto Oga S. Colombano,2300,SO,01/01/1992,,N,10.30596404,46.45356516,Sondrio
+14443,Precipitazione,mm,1366,Porlezza torrente,291,CO,12/12/2012,,N,9.14079938,46.03777316,Como
+6824,Umidità Relativa,%,656,Gambara v.Parma,47,BS,01/01/1999,,N,10.29913,45.24955194,Brescia
+14161,Radiazione Globale,W/m²,1202,Vercana,980,CO,16/06/2012,,N,9.32468906,46.18185467,Como
+6823,Temperatura,°C,656,Gambara v.Parma,47,BS,01/01/1990,,N,10.29913,45.24955194,Brescia
+14118,Precipitazione,mm,1325,Collio Memmo,1069,BS,18/03/2012,,N,10.31552778,45.81136111,Brescia
+14284,Temperatura,°C,1347,Barzio Piani di Bobbio,1713,LC,14/10/2012,,N,9.50113918,45.95949713,Lecco
+19335,Precipitazione,mm,1551,Premana v.Luciani papa,910,LC,08/07/2015,,N,9.419878,46.0519,Lecco
+17465,Umidità Relativa,%,58,Carona Lago Fregabolgia,1955,BG,21/10/2018,,N,9.86305936,46.02444861,Bergamo
+19377,Precipitazione,mm,1651,Morbegno eliporto,230,SO,28/07/2016,,N,9.58432198,46.13664246,Sondrio
+8152,Precipitazione,mm,885,Arcisate,383,VA,05/07/2000,,N,8.89055144,45.84610806,Varese
+9027,Temperatura,°C,1206,Cavaria con Premezzo v. Cantalupa,274,VA,01/01/2004,,N,8.80769797,45.68949617,Varese
+6163,Umidità Relativa,%,564,Erba v. Battisti,279,CO,21/02/2009,,N,9.2217792,45.8085738,Como
+32370,Temperatura,°C,1679,Sormano rifugio Alpetto,1158,CO,23/11/2017,,N,9.23506881,45.90514139,Como
+19346,Umidità Relativa,%,1560,Padenghe sul Garda v.Fondrini,187,BS,14/07/2016,,N,10.50612,45.518286,Brescia
+14370,Umidità Relativa,%,1360,Clusone SP 671,564,BG,14/11/2012,,N,9.93314133,45.88094706,Bergamo
+14477,Radiazione Globale,W/m²,1367,Bagolino SP669,775,BS,12/12/2012,,N,10.452199,45.83860244,Brescia
+5870,Precipitazione,mm,564,Erba v. Battisti,279,CO,01/07/2009,,N,9.2217792,45.8085738,Como
+32241,Umidità Relativa,%,884,Cuveglio,294,VA,01/08/2016,,N,8.74277458,45.90332947,Varese
+9868,Temperatura,°C,672,Cornale v.Libertà,74,PV,28/07/2005,,N,8.91415717,45.04008561,Pavia
+2613,Temperatura,°C,212,Canzo,1233,CO,20/04/2011,,N,9.31813681,45.84814356,Como
+9388,Umidità Relativa,%,1202,Vercana,980,CO,19/02/2009,,N,9.32468906,46.18185467,Como
+9016,Temperatura,°C,1224,Cortenova,456,LC,01/01/2004,,N,9.38040375,46.00746603,Lecco
+9399,Umidità Relativa,%,1222,Cavargna,1100,CO,17/12/2008,,N,9.11084686,46.09155206,Como
+8171,Precipitazione,mm,821,Azzone Dezzo di Scalve,746,BG,31/12/2001,,N,10.10276314,45.97745722,Bergamo
+2083,Umidità Relativa,%,106,Varzi Nivione,500,PV,15/05/2001,,N,9.17949163,44.80739989,Pavia
+17472,Umidità Relativa,%,1871,Tavernola Bergamasca Gallinarga,185,BG,27/11/2018,,N,10.05422004,45.6963302,Bergamo
+6699,Umidità Relativa,%,642,Pavia v. Folperti,77,PV,01/06/2002,,N,9.16464919,45.19468231,Pavia
+9108,Precipitazione,mm,1201,Canevino,455,PV,01/01/2004,,N,9.275674,44.93479528,Pavia
+14478,Temperatura,°C,1367,Bagolino SP669,775,BS,12/12/2012,,N,10.452199,45.83860244,Brescia
+8227,Temperatura,°C,904,Paisco Loveno,816,BS,20/06/2003,,N,10.29694303,46.07861336,Brescia
+9102,Precipitazione,mm,1220,Ponte di Legno Case Pirli,1640,BS,01/01/2004,,N,10.5310511,46.28969035,Brescia
+19426,Temperatura,°C,1657,Mariano Comense campo sportivo,255,CO,11/10/2017,,N,9.177773,45.684884,Como
+8151,Temperatura,°C,884,Cuveglio,294,VA,06/07/2000,,N,8.74277458,45.90332947,Varese
+5864,Temperatura,°C,594,Bergamo v.Goisis,290,BG,13/09/1996,,N,9.68896994,45.71591825,Bergamo
+32345,Radiazione Globale,W/m²,1359,Breno Lago Della Vacca,2410,BS,11/07/2017,,N,10.4427287,45.95749967,Brescia
+19282,Temperatura,°C,1513,Introbio al bivio,574,LC,28/01/2017,,N,9.4507999,45.966301,Lecco
+4033,Precipitazione,mm,143,Livigno Passo Foscagno,2320,SO,02/06/2002,,N,10.20748854,46.49442378,Sondrio
+9034,Temperatura,°C,1209,Rota d'Imagna,674,BG,02/01/2004,,N,9.51135208,45.83984475,Bergamo
+17518,Radiazione Globale,W/m²,1375,Varano Borghi,241,VA,21/10/2018,,N,8.71232365,45.76639371,Varese
+2596,Precipitazione,mm,205,Montevecchia cascina Butto,385,LC,06/10/2014,,N,9.38387611,45.70480511,Lecco
+14667,Umidità Relativa,%,1383,Sarezzo v.della Fonte,290,BS,02/11/2012,,N,10.1870962,45.66779897,Brescia
+14586,Precipitazione,mm,1379,Gargnano,984,BS,15/07/2015,,N,10.61740677,45.72996009,Brescia
+10778,Umidità Relativa,%,16,Valfurva Ghiacciaio dei Forni,2180,SO,15/12/2021,,N,10.55541386,46.42078875,Sondrio
+14119,Precipitazione,mm,1324,Limone sul Garda,75,BS,18/03/2012,,N,10.79005556,45.80683333,Brescia
+9397,Umidità Relativa,%,1237,Monno,1728,BS,17/02/2009,,N,10.308807,46.25030272,Brescia
+14605,Precipitazione,mm,1380,Tremezzo,309,CO,18/04/2013,,N,9.2140589,45.9877167,Como
+17435,Umidità Relativa,%,1862,Broni,77,PV,22/03/2018,,N,9.22386082,45.04448039,Pavia
+10381,Umidità Relativa,%,706,Lecco v.Sora,272,LC,22/07/2008,,N,9.39995481,45.86375372,Lecco
+2246,Umidità Relativa,%,117,Edolo Ist.Meneghini,699,BS,01/01/1998,,N,10.33339293,46.17572375,Brescia
+9105,Precipitazione,mm,1224,Cortenova,456,LC,01/01/2004,,N,9.38040375,46.00746603,Lecco
+19308,Umidità Relativa,%,1518,Dubino La Piazza,993,SO,21/11/2014,,N,9.45812983,46.16725553,Sondrio
+19334,Umidità Relativa,%,1551,Premana v.Luciani papa,910,LC,08/07/2015,,N,9.419878,46.0519,Lecco
+4057,Precipitazione,mm,146,Mezzoldo Passo S.Marco,1824,BG,23/05/2003,,N,9.62865186,46.0382628,Bergamo
+14406,Precipitazione,mm,1365,Bione,911,BS,18/11/2012,,N,10.32736288,45.66721826,Brescia
+8199,Precipitazione,mm,865,Cantù Asnago,244,CO,29/04/2003,,N,9.10037269,45.71853181,Como
+8006,Precipitazione,mm,856,Fortunago,501,PV,01/01/1998,,N,9.19499417,44.91250111,Pavia
+14527,Precipitazione,mm,1375,Varano Borghi,241,VA,27/03/2013,,N,8.71232365,45.76639371,Varese
+22017,Radiazione Globale,W/m²,1890,Tavernole sul Mella Monte Guglielmo,1790,BS,14/10/2019,,N,10.17540709,45.75389593,Brescia
+8196,Temperatura,°C,886,Vigevano SS494,94,PV,18/02/2003,,N,8.87967586,45.34142636,Pavia
+19375,Temperatura,°C,1651,Morbegno eliporto,230,SO,28/07/2016,,N,9.58432198,46.13664246,Sondrio
+14014,Temperatura,°C,1077,Oltre il Colle Zambla,1138,BG,13/01/2012,,N,9.78893967,45.89119304,Bergamo
+17573,Temperatura,°C,1880,Lomello Cantona,84,PV,05/12/2018,,N,8.80829914,45.12147725,Pavia
+8005,Temperatura,°C,857,Santa Margherita di Staffora Passo del Giovà,1363,PV,01/01/1998,,N,9.21663743,44.6837785,Pavia
+9101,Precipitazione,mm,1238,Val Masino S.Martino,943,SO,21/02/2000,,N,9.63217806,46.24144667,Sondrio
+8191,Temperatura,°C,908,Voghera v. Cambiaso,95,PV,04/03/2003,,N,9.01750575,44.9902815,Pavia
+6849,Temperatura,°C,659,Odolo v.Praes,349,BS,08/10/1990,,N,10.38929672,45.64605175,Brescia
+14125,Temperatura,°C,1328,Teglio S. Giacomo,357,SO,20/04/2012,,N,10.03847892,46.15827664,Sondrio
+14769,Umidità Relativa,%,1553,Mozzanica v.Donizetti,104,BG,20/07/2015,,N,9.68248866,45.47736192,Bergamo
+6164,Umidità Relativa,%,573,Colico v.La Madoneta,229,LC,11/07/2001,,N,9.38468725,46.1381409,Lecco
+9090,Precipitazione,mm,1210,Ranzanico,486,BG,01/01/2004,,N,9.9330421,45.78641993,Bergamo
+14700,Precipitazione,mm,1420,Gordona,1362,SO,20/03/2014,,N,9.33920315,46.29151911,Sondrio
+32354,Umidità Relativa,%,1807,Ispra JRC,249,VA,21/04/2022,,N,8.6365627,45.80595188,Varese
+14221,Temperatura,°C,1343,Lanzada Passo Marinelli,3032,SO,13/10/2012,,N,9.91515411,46.34981046,Sondrio
+14546,Temperatura,°C,1376,Puegnago del Garda,291,BS,19/04/2013,,N,10.5003309,45.5798378,Brescia
+14367,Temperatura,°C,1360,Clusone SP 671,564,BG,14/11/2012,,N,9.93314133,45.88094706,Bergamo
+14588,Umidità Relativa,%,1379,Gargnano,984,BS,15/07/2015,,N,10.61740677,45.72996009,Brescia
+17511,Radiazione Globale,W/m²,856,Fortunago,501,PV,21/10/2018,,N,9.19499417,44.91250111,Pavia
+22580,Precipitazione,mm,1955,Magasa Malga Corva,1244,BS,01/06/2023,,N,10.6275831109109,45.7740906088109,Brescia
+4012,Radiazione Globale,W/m²,141,Vertemate con Minoprio serre,310,CO,25/05/2002,,N,9.0854885,45.71901089,Como
+32413,Radiazione Globale,W/m²,1680,Vilminore di Scalve Presolana,1856,BG,15/11/2017,,N,10.041578,45.98117244,Bergamo
+8157,Temperatura,°C,817,Pavia SS 35,71,PV,04/05/2000,,N,9.14666412,45.18062204,Pavia
+14252,Altezza Neve,cm,1346,Campodolcino Alpe Motta,1880,SO,17/10/2012,,N,9.36883561,46.42312151,Sondrio
+9395,Umidità Relativa,%,1209,Rota d'Imagna,674,BG,23/01/2009,,N,9.51135208,45.83984475,Bergamo
+9106,Precipitazione,mm,1205,Molteno Cimitero,278,LC,01/01/2004,,N,9.30710044,45.78301922,Lecco
+11020,Umidità Relativa,%,1205,Molteno Cimitero,278,LC,16/12/2010,,N,9.30710044,45.78301922,Lecco
+14665,Temperatura,°C,1383,Sarezzo v.della Fonte,290,BS,02/11/2012,,N,10.1870962,45.66779897,Brescia
+22006,Umidità Relativa,%,1890,Tavernole sul Mella Monte Guglielmo,1790,BS,14/10/2019,,N,10.17540709,45.75389593,Brescia
+8010,Precipitazione,mm,835,Valdisotto Oga S. Colombano,2300,SO,01/01/1992,,N,10.30596404,46.45356516,Sondrio
+8167,Precipitazione,mm,860,Angera v.le Repubblica,202,VA,05/07/2000,,N,8.57392189,45.77080719,Varese
+32247,Umidità Relativa,%,904,Paisco Loveno,816,BS,01/08/2016,,N,10.29694303,46.07861336,Brescia
+8094,Precipitazione,mm,832,Lanzada Palù,2151,SO,01/01/1992,,N,9.88452786,46.2929069,Sondrio
+2415,Umidità Relativa,%,130,Brescia ITAS Pastori,149,BS,01/01/1995,,N,10.26138219,45.52614578,Brescia
+19441,Temperatura,°C,1659,Mornico al Serio campo sportivo,162,BG,14/04/2017,,N,9.801961,45.593154,Bergamo
+9020,Temperatura,°C,1222,Cavargna,1100,CO,09/04/2004,,N,9.11084686,46.09155206,Como
+9001,Temperatura,°C,1210,Ranzanico,486,BG,01/01/2004,,N,9.9330421,45.78641993,Bergamo
+14128,Precipitazione,mm,1328,Teglio S. Giacomo,357,SO,20/04/2012,,N,10.03847892,46.15827664,Sondrio
+6696,Radiazione Globale,W/m²,642,Pavia v. Folperti,77,PV,01/06/2002,,N,9.16464919,45.19468231,Pavia
+2148,Radiazione Globale,W/m²,111,Cassina Valsassina Moggio,1234,LC,31/10/2003,,N,9.49750222,45.91309369,Lecco
+14687,Umidità Relativa,%,1420,Gordona,1362,SO,20/03/2014,,N,9.33920315,46.29151911,Sondrio
+10556,Radiazione Globale,W/m²,554,Saronno v.Santuario,212,VA,06/07/2010,,N,9.02640138,45.62735705,Varese
+14445,Temperatura,°C,1366,Porlezza torrente,291,CO,10/05/2013,,N,9.14079938,46.03777316,Como
+14039,Umidità Relativa,%,836,Aprica,1950,SO,27/02/2012,,N,10.14826598,46.12968795,Sondrio
+14765,Precipitazione,mm,1553,Mozzanica v.Donizetti,104,BG,13/08/2015,,N,9.68248866,45.47736192,Bergamo
+11025,Precipitazione,mm,826,Gavardo SP 116,205,BS,06/08/2020,,N,10.44108528,45.59235897,Brescia
+17593,Radiazione Globale,W/m²,1889,Val Masino Merdarola,2280,SO,01/08/2019,,N,9.58163635,46.22931619,Sondrio
+22002,Altezza Neve,cm,1890,Tavernole sul Mella Monte Guglielmo,1790,BS,06/11/2019,,N,10.17540709,45.75389593,Brescia
+14725,Temperatura,°C,1545,San Siro Alpe Rescascìa,1285,CO,30/12/2014,,N,9.2383327,46.0719452,Como
+14139,Temperatura,°C,1330,Olgiate Comasco v.Repubblica,400,CO,18/04/2012,,N,8.97262961,45.77306208,Como
+2614,Precipitazione,mm,212,Canzo,1233,CO,26/11/2008,,N,9.31813681,45.84814356,Como
+19443,Precipitazione,mm,1659,Mornico al Serio campo sportivo,162,BG,08/09/2017,,N,9.801961,45.593154,Bergamo
+9002,Temperatura,°C,1211,Castronno,379,VA,01/01/2004,,N,8.82076322,45.74873297,Varese
+17580,Temperatura,°C,847,Carona Carisole,1954,BG,20/08/2016,,N,9.79379959,46.03852339,Bergamo
+9827,Radiazione Globale,W/m²,835,Valdisotto Oga S. Colombano,2300,SO,01/10/1992,,N,10.30596404,46.45356516,Sondrio
+6994,Umidità Relativa,%,679,Valmadrera v.Pozzi,247,LC,02/02/2006,,N,9.35166247,45.84221272,Lecco
+4020,Radiazione Globale,W/m²,142,Caiolo,274,SO,24/05/2002,,N,9.79251888,46.15492316,Sondrio
+14402,Umidità Relativa,%,1365,Bione,911,BS,18/11/2012,,N,10.32736288,45.66721826,Brescia
+14141,Precipitazione,mm,1330,Olgiate Comasco v.Repubblica,400,CO,08/06/2016,,N,8.97262961,45.77306208,Como
+4029,Radiazione Globale,W/m²,143,Livigno Passo Foscagno,2320,SO,02/06/2002,,N,10.20748854,46.49442378,Sondrio
+5876,Precipitazione,mm,573,Colico v.La Madoneta,229,LC,06/11/1990,,N,9.38468725,46.1381409,Lecco
+6992,Temperatura,°C,679,Valmadrera v.Pozzi,247,LC,02/02/2006,,N,9.35166247,45.84221272,Lecco
+14473,Umidità Relativa,%,1367,Bagolino SP669,775,BS,12/12/2012,,N,10.452199,45.83860244,Brescia
+8135,Precipitazione,mm,874,Sarnico v. Roma,197,BG,12/04/2001,,N,9.95688896,45.66594103,Bergamo
+12761,Altezza Neve,cm,1420,Gordona,1362,SO,02/12/2020,,N,9.33920315,46.29151911,Sondrio
+14584,Radiazione Globale,W/m²,1378,Tignale Oldesio,374,BS,23/07/2013,,N,10.7209063,45.7326393,Brescia
+17572,Precipitazione,mm,1880,Lomello Cantona,84,PV,05/12/2018,,N,8.80829914,45.12147725,Pavia
+19384,Radiazione Globale,W/m²,1651,Morbegno eliporto,230,SO,28/07/2016,,N,9.58432198,46.13664246,Sondrio
+5863,Temperatura,°C,595,Filago v.Don Milani,190,BG,07/12/1991,,N,9.55609572,45.63387247,Bergamo
+5933,Precipitazione,mm,558,Busto Arsizio  Accam,206,VA,05/12/1998,,N,8.84216546,45.58289429,Varese
+8202,Temperatura,°C,858,Santa Margherita di Staffora Casanova,575,PV,01/01/2003,,N,9.23905083,44.76803261,Pavia
+6792,Precipitazione,mm,653,Brescia v.Ziziola,125,BS,15/10/1997,,N,10.21846492,45.51456611,Brescia
+32353,Temperatura,°C,1807,Ispra JRC,249,VA,21/04/2022,,N,8.6365627,45.80595188,Varese
+24411,Umidità Relativa,%,1974,Grone San Fermo,1246,BG,30/08/2020,,N,9.93587297,45.74415628,Bergamo
+6846,Precipitazione,mm,659,Odolo v.Praes,349,BS,22/02/2006,,N,10.38929672,45.64605175,Brescia
+8588,Temperatura,°C,998,Laveno-Mombello p.zza Matteotti,207,VA,24/06/1999,,N,8.61868535,45.90991335,Varese
+9398,Umidità Relativa,%,1220,Ponte di Legno Case Pirli,1640,BS,05/02/2009,,N,10.5310511,46.28969035,Brescia
+2112,Radiazione Globale,W/m²,108,Samolaco v.Vignola,206,SO,24/07/1998,,N,9.42666579,46.23610858,Sondrio
+14132,Umidità Relativa,%,1329,Lavena Ponte Tresa via della Boschiva,269,VA,18/04/2012,,N,8.85024227,45.9716903,Varese
+2400,Temperatura,°C,129,Capo di Ponte v.Briscioli,362,BS,30/10/2002,,N,10.3425026,46.02656354,Brescia
+14253,Precipitazione,mm,1346,Campodolcino Alpe Motta,1880,SO,17/10/2012,,N,9.36883561,46.42312151,Sondrio
+19388,Temperatura,°C,1650,Bormio eliporto,1172,SO,29/09/2016,,N,10.36603171,46.45370081,Sondrio
+2362,Umidità Relativa,%,125,Castello d'Agogna,106,PV,01/01/1993,,N,8.70057165,45.24680044,Pavia
+19427,Umidità Relativa,%,1657,Mariano Comense campo sportivo,255,CO,11/10/2017,,N,9.177773,45.684884,Como
+19354,Temperatura,°C,1561,Porto Ceresio campo sportivo,275,VA,23/12/2016,,N,8.89259411,45.89770026,Varese
+6157,Umidità Relativa,%,595,Filago v.Don Milani,190,BG,01/01/1992,,N,9.55609572,45.63387247,Bergamo
+17463,Umidità Relativa,%,1872,Lasnigo s.Alessandro,554,CO,26/09/2018,,N,9.26121361,45.88564351,Como
+12753,Altezza Neve,cm,28,Chiesa in Valmalenco Alpe Entova,1905,SO,01/12/2020,,N,9.83412892,46.32141817,Sondrio
+23,Precipitazione,mm,16,Valfurva Ghiacciaio dei Forni,2180,SO,03/05/1988,,N,10.55541386,46.42078875,Sondrio
+9026,Temperatura,°C,1233,Lurago Marinone,296,CO,01/01/2004,,N,8.98833547,45.70496503,Como
+4009,Temperatura,°C,141,Vertemate con Minoprio serre,310,CO,19/06/2002,,N,9.0854885,45.71901089,Como
+9384,Umidità Relativa,%,1210,Ranzanico,486,BG,21/01/2009,,N,9.9330421,45.78641993,Bergamo
+9115,Precipitazione,mm,1233,Lurago Marinone,296,CO,01/01/2004,,N,8.98833547,45.70496503,Como
+14317,Temperatura,°C,823,Piazza Brembana vivaio,510,BG,21/10/2012,,N,9.67277767,45.94611233,Bergamo
+207,Altezza Neve,cm,16,Valfurva Ghiacciaio dei Forni,2180,SO,05/12/2011,,N,10.55541386,46.42078875,Sondrio
+32404,Umidità Relativa,%,1680,Vilminore di Scalve Presolana,1856,BG,15/11/2017,,N,10.041578,45.98117244,Bergamo
+8136,Temperatura,°C,874,Sarnico v. Roma,197,BG,12/04/2001,,N,9.95688896,45.66594103,Bergamo
+2384,Radiazione Globale,W/m²,127,Casatenovo tetto,360,LC,10/11/2003,,N,9.30914481,45.70194614,Lecco
+17460,Temperatura,°C,1872,Lasnigo s.Alessandro,554,CO,26/09/2018,,N,9.26121361,45.88564351,Como
+14255,Radiazione Globale,W/m²,1346,Campodolcino Alpe Motta,1880,SO,17/10/2012,,N,9.36883561,46.42312151,Sondrio
+17450,Precipitazione,mm,1871,Tavernola Bergamasca Gallinarga,185,BG,27/11/2018,,N,10.05422004,45.6963302,Bergamo
+22576,Temperatura,°C,1955,Magasa Malga Corva,1244,BS,01/06/2023,,N,10.6275831109109,45.7740906088109,Brescia
+14501,Umidità Relativa,%,1371,Brembilla,468,BG,19/03/2013,,N,9.60925258,45.81475229,Bergamo
+14292,Umidità Relativa,%,1347,Barzio Piani di Bobbio,1713,LC,14/10/2012,,N,9.50113918,45.95949713,Lecco
+9110,Precipitazione,mm,1234,Osnago,234,LC,01/01/2004,,N,9.38855728,45.6777065,Lecco
+9008,Temperatura,°C,1216,Valbondione,1784,BG,01/12/2000,,N,10.03860694,46.06456797,Bergamo
+17545,Umidità Relativa,%,33,Lanzada Ganda,988,SO,28/12/2018,,N,9.884505,46.270224,Sondrio
+10666,Precipitazione,mm,1898,Valganna Mondonico,665,VA,18/05/2020,,N,8.8106663,45.91491984,Varese
+8011,Umidità Relativa,%,835,Valdisotto Oga S. Colombano,2300,SO,01/01/1992,,N,10.30596404,46.45356516,Sondrio
+19403,Precipitazione,mm,1652,Tirano eliporto,481,SO,07/12/2016,,N,10.18226719,46.2181778,Sondrio
+8195,Precipitazione,mm,886,Vigevano SS494,94,PV,18/02/2003,,N,8.87967586,45.34142636,Pavia
+4051,Umidità Relativa,%,146,Mezzoldo Passo S.Marco,1824,BG,23/05/2003,,N,9.62865186,46.0382628,Bergamo
+19363,Temperatura,°C,1559,Dervio v.S.Cecilia,198,LC,05/07/2016,,N,9.30538273,46.06896591,Lecco
+14547,Umidità Relativa,%,1376,Puegnago del Garda,291,BS,19/04/2013,,N,10.5003309,45.5798378,Brescia
+19410,Radiazione Globale,W/m²,1652,Tirano eliporto,481,SO,07/12/2016,,N,10.18226719,46.2181778,Sondrio
+2368,Precipitazione,mm,125,Castello d'Agogna,106,PV,17/10/1990,,N,8.70057165,45.24680044,Pavia
+2414,Temperatura,°C,130,Brescia ITAS Pastori,149,BS,01/01/1995,,N,10.26138219,45.52614578,Brescia
+17437,Precipitazione,mm,1862,Broni,77,PV,22/03/2018,,N,9.22386082,45.04448039,Pavia
+12719,Umidità Relativa,%,1899,Bereguardo Fornasetta,95,PV,11/08/2020,,N,9.02191087,45.26278148,Pavia
+14607,Umidità Relativa,%,1380,Tremezzo,309,CO,18/04/2013,,N,9.2140589,45.9877167,Como
+48,Precipitazione,mm,35,Caspoggio Piazzo Cavalli,1719,SO,27/10/1989,,N,9.870887,46.249872,Sondrio
+2111,Umidità Relativa,%,108,Samolaco v.Vignola,206,SO,27/07/1994,,N,9.42666579,46.23610858,Sondrio
+2116,Precipitazione,mm,108,Samolaco v.Vignola,206,SO,27/07/1994,,N,9.42666579,46.23610858,Sondrio
+2188,Umidità Relativa,%,114,Landriano Cascina Marianna,88,PV,29/09/2005,,N,9.26715311,45.32059361,Pavia
+6986,Precipitazione,mm,679,Valmadrera v.Pozzi,247,LC,21/01/2006,,N,9.35166247,45.84221272,Lecco
+19401,Temperatura,°C,1652,Tirano eliporto,481,SO,07/12/2016,,N,10.18226719,46.2181778,Sondrio
+8187,Temperatura,°C,905,Cevo,1128,BS,18/06/2003,,N,10.37778231,46.08055608,Brescia
+17446,Precipitazione,mm,1692,Bienno Piazze,472,BS,13/07/2018,,N,10.29124095,45.92751023,Brescia
+5868,Temperatura,°C,586,Costa Volpino v.Nazionale,192,BG,26/07/1993,,N,10.09707131,45.82716061,Bergamo
+9310,Temperatura,°C,646,Como Villa Gallia,201,CO,01/01/1999,,N,9.06697886,45.81504217,Como
+2449,Radiazione Globale,W/m²,133,Bema,958,SO,01/01/1993,,N,9.5693423,46.10552765,Sondrio
+8004,Precipitazione,mm,857,Santa Margherita di Staffora Passo del Giovà,1363,PV,01/01/1998,,N,9.21663743,44.6837785,Pavia
+9865,Radiazione Globale,W/m²,672,Cornale v.Libertà,74,PV,29/07/2005,,N,8.91415717,45.04008561,Pavia
+4016,Precipitazione,mm,141,Vertemate con Minoprio serre,310,CO,04/02/2009,,N,9.0854885,45.71901089,Como
+2098,Radiazione Globale,W/m²,107,Sondrio Fond.Fojanini,307,SO,05/03/2001,,N,9.85094015,46.16755337,Sondrio
+14265,Umidità Relativa,%,1346,Campodolcino Alpe Motta,1880,SO,17/10/2012,,N,9.36883561,46.42312151,Sondrio
+10377,Temperatura,°C,706,Lecco v.Sora,272,LC,22/07/2008,,N,9.39995481,45.86375372,Lecco
+5877,Temperatura,°C,573,Colico v.La Madoneta,229,LC,06/11/1990,,N,9.38468725,46.1381409,Lecco
+22322,Precipitazione,mm,1914,Trescore Balneario V. Cherio,251,BG,17/07/2023,,N,9.84904342074871,45.6904426407361,Bergamo
+2190,Radiazione Globale,W/m²,114,Landriano Cascina Marianna,88,PV,29/09/2005,,N,9.26715311,45.32059361,Pavia
+14348,Temperatura,°C,1359,Breno Lago Della Vacca,2410,BS,09/12/2012,,N,10.4427287,45.95749967,Brescia
+2595,Temperatura,°C,205,Montevecchia cascina Butto,385,LC,06/10/2014,,N,9.38387611,45.70480511,Lecco
+14197,Precipitazione,mm,1342,Ponte in Valtellina Lago Reguzzo,2440,SO,13/10/2012,,N,9.96999939,46.09651358,Sondrio
+12,Temperatura,°C,3,Sondalo Le Prese,950,SO,24/11/1987,,N,10.35482014,46.35017631,Sondrio
+7030,Umidità Relativa,%,687,Ferno v.Di Dio,215,VA,05/11/2006,,N,8.75697656,45.61924753,Varese
+5861,Precipitazione,mm,586,Costa Volpino v.Nazionale,192,BG,01/01/1992,,N,10.09707131,45.82716061,Bergamo
+17474,Radiazione Globale,W/m²,1382,Veddasca Monte Cadrigna,1302,VA,27/09/2018,,N,8.76881513,46.07182708,Varese
+8018,Precipitazione,mm,836,Aprica,1950,SO,01/01/1992,,N,10.14826598,46.12968795,Sondrio
+8230,Precipitazione,mm,900,Chiari,140,BS,20/06/2003,,N,9.93777821,45.52222206,Brescia
+9043,Altezza Neve,cm,1237,Monno,1728,BS,15/10/2004,,N,10.308807,46.25030272,Brescia
+6796,Umidità Relativa,%,653,Brescia v.Ziziola,125,BS,18/11/2003,,N,10.21846492,45.51456611,Brescia
+8028,Altezza Neve,cm,848,Livigno La Vallaccia,2660,SO,13/09/1993,,N,10.18873661,46.47730866,Sondrio
+14058,Temperatura,°C,1324,Limone sul Garda,75,BS,13/03/2012,,N,10.79005556,45.80683333,Brescia
+14019,Radiazione Globale,W/m²,1077,Oltre il Colle Zambla,1138,BG,13/01/2012,,N,9.78893967,45.89119304,Bergamo
+17464,Radiazione Globale,W/m²,58,Carona Lago Fregabolgia,1955,BG,21/10/2018,,N,9.86305936,46.02444861,Bergamo
+2433,Temperatura,°C,132,Bergamo v.Stezzano,211,BG,01/01/1993,,N,9.65876847,45.66051928,Bergamo
+8585,Umidità Relativa,%,999,Laveno-Mombello Poggio S.Elsa,950,VA,23/06/1999,,N,8.63818571,45.91099372,Varese
+2251,Precipitazione,mm,117,Edolo Ist.Meneghini,699,BS,02/04/1993,,N,10.33339293,46.17572375,Brescia
+14038,Radiazione Globale,W/m²,836,Aprica,1950,SO,27/02/2012,,N,10.14826598,46.12968795,Sondrio
+14282,Radiazione Globale,W/m²,1347,Barzio Piani di Bobbio,1713,LC,14/10/2012,,N,9.50113918,45.95949713,Lecco
+2271,Umidità Relativa,%,119,San Giovanni Bianco Cornalita,622,BG,07/09/2001,,N,9.63912077,45.86969697,Bergamo
+8584,Temperatura,°C,999,Laveno-Mombello Poggio S.Elsa,950,VA,23/06/1999,,N,8.63818571,45.91099372,Varese
+19376,Umidità Relativa,%,1651,Morbegno eliporto,230,SO,23/09/2016,,N,9.58432198,46.13664246,Sondrio
+10552,Umidità Relativa,%,554,Saronno v.Santuario,212,VA,06/07/2010,,N,9.02640138,45.62735705,Varese
+9099,Precipitazione,mm,1235,Cene Ponte,361,BG,01/01/2012,,N,9.8215332,45.78420692,Bergamo
+2460,Umidità Relativa,%,134,Corzano Bargnano,93,BS,03/05/1998,,N,10.03902737,45.43372847,Brescia
+32238,Umidità Relativa,%,856,Fortunago,501,PV,01/08/2016,,N,9.19499417,44.91250111,Pavia
+41,Precipitazione,mm,28,Chiesa in Valmalenco Alpe Entova,1905,SO,28/10/1989,,N,9.83412892,46.32141817,Sondrio
+32394,Umidità Relativa,%,1555,Manerba del Garda Dusano,73,BS,17/11/2017,,N,10.56663509,45.543701,Brescia
+14499,Precipitazione,mm,1371,Brembilla,468,BG,19/03/2013,,N,9.60925258,45.81475229,Bergamo
+14365,Precipitazione,mm,1359,Breno Lago Della Vacca,2410,BS,09/12/2012,,N,10.4427287,45.95749967,Brescia
+4017,Temperatura,°C,142,Caiolo,274,SO,24/05/2002,,N,9.79251888,46.15492316,Sondrio
+14205,Altezza Neve,cm,1343,Lanzada Passo Marinelli,3032,SO,13/10/2012,,N,9.91515411,46.34981046,Sondrio
+32250,Umidità Relativa,%,876,Caino,428,BS,01/08/2016,,N,10.32222392,45.60972056,Brescia
+9021,Temperatura,°C,1234,Osnago,234,LC,01/01/2004,,N,9.38855728,45.6777065,Lecco
+14194,Temperatura,°C,1342,Ponte in Valtellina Lago Reguzzo,2440,SO,13/10/2012,,N,9.96999939,46.09651358,Sondrio
+10773,Umidità Relativa,%,35,Caspoggio Piazzo Cavalli,1719,SO,13/02/2021,,N,9.870887,46.249872,Sondrio
+2404,Radiazione Globale,W/m²,129,Capo di Ponte v.Briscioli,362,BS,12/09/2003,,N,10.3425026,46.02656354,Brescia
+8014,Altezza Neve,cm,833,Gerola Alta Pescegallo,1875,SO,01/01/1992,,N,9.57112074,46.0261969,Sondrio
+17459,Precipitazione,mm,1872,Lasnigo s.Alessandro,554,CO,26/09/2018,,N,9.26121361,45.88564351,Como
+19283,Umidità Relativa,%,1513,Introbio al bivio,574,LC,22/06/2018,,N,9.4507999,45.966301,Lecco
+8103,Precipitazione,mm,851,Treviso Bresciano Cavacca,1147,BS,01/01/1998,,N,10.49916675,45.72416486,Brescia
+9040,Altezza Neve,cm,1216,Valbondione,1784,BG,01/01/2004,,N,10.03860694,46.06456797,Bergamo
+9097,Precipitazione,mm,1216,Valbondione,1784,BG,01/12/2000,,N,10.03860694,46.06456797,Bergamo
+32244,Umidità Relativa,%,885,Arcisate,383,VA,01/08/2016,,N,8.89055144,45.84610806,Varese
+19364,Umidità Relativa,%,1559,Dervio v.S.Cecilia,198,LC,05/07/2016,,N,9.30538273,46.06896591,Lecco
+8164,Temperatura,°C,859,Luino v. Piero Chiara,205,VA,05/07/2000,,N,8.74272325,46.00414283,Varese
+2096,Temperatura,°C,107,Sondrio Fond.Fojanini,307,SO,29/01/2001,,N,9.85094015,46.16755337,Sondrio
+14661,Precipitazione,mm,1382,Veddasca Monte Cadrigna,1302,VA,19/07/2013,,N,8.76881513,46.07182708,Varese
+8208,Precipitazione,mm,910,Manerbio v.Dante,60,BS,09/04/2003,,N,10.14555158,45.35975344,Brescia
+4037,Radiazione Globale,W/m²,144,Madesimo Spluga,1915,SO,19/11/2000,,N,9.34812808,46.47166446,Sondrio
+8139,Precipitazione,mm,876,Caino,428,BS,01/02/2001,,N,10.32222392,45.60972056,Brescia
+17585,Temperatura,°C,1889,Val Masino Merdarola,2280,SO,01/01/2008,,N,9.58163635,46.22931619,Sondrio
+19344,Precipitazione,mm,1556,Prata Camportaccio Pratella,1035,SO,03/12/2015,,N,9.413906,46.292608,Sondrio
+2452,Precipitazione,mm,133,Bema,958,SO,01/01/1993,,N,9.5693423,46.10552765,Sondrio
+14545,Precipitazione,mm,1376,Puegnago del Garda,291,BS,19/04/2013,,N,10.5003309,45.5798378,Brescia
+9869,Umidità Relativa,%,672,Cornale v.Libertà,74,PV,28/07/2005,,N,8.91415717,45.04008561,Pavia
+2187,Temperatura,°C,114,Landriano Cascina Marianna,88,PV,29/09/2005,,N,9.26715311,45.32059361,Pavia
+9017,Temperatura,°C,1205,Molteno Cimitero,278,LC,01/01/2004,,N,9.30710044,45.78301922,Lecco
+19024,Radiazione Globale,W/m²,1422,Bergamo v.Maffei,249,BG,06/11/2013,,N,9.67466286,45.69520255,Bergamo
+10658,Temperatura,°C,1898,Valganna Mondonico,665,VA,18/05/2020,,N,8.8106663,45.91491984,Varese
+19345,Temperatura,°C,1560,Padenghe sul Garda v.Fondrini,187,BS,14/07/2016,,N,10.50612,45.518286,Brescia
+8092,Temperatura,°C,832,Lanzada Palù,2151,SO,01/01/1992,,N,9.88452786,46.2929069,Sondrio
+19333,Temperatura,°C,1551,Premana v.Luciani papa,910,LC,08/07/2015,,N,9.419878,46.0519,Lecco
+6161,Umidità Relativa,%,586,Costa Volpino v.Nazionale,192,BG,26/07/1993,,N,10.09707131,45.82716061,Bergamo
+8096,Temperatura,°C,912,Foppolo,1682,BG,01/01/1998,,N,9.75610761,46.04249594,Bergamo
+19293,Temperatura,°C,1514,Carenno centro sportivo,633,LC,08/05/2018,,N,9.46596925,45.8009939,Lecco
+17562,Temperatura,°C,1879,Montichiari Boschetti,92,BS,13/12/2018,,N,10.41406192,45.40275984,Brescia
+12716,Temperatura,°C,1899,Bereguardo Fornasetta,95,PV,11/08/2020,,N,9.02191087,45.26278148,Pavia
+14224,Precipitazione,mm,1343,Lanzada Passo Marinelli,3032,SO,13/10/2012,,N,9.91515411,46.34981046,Sondrio
+6990,Radiazione Globale,W/m²,679,Valmadrera v.Pozzi,247,LC,02/02/2006,,N,9.35166247,45.84221272,Lecco
+4010,Umidità Relativa,%,141,Vertemate con Minoprio serre,310,CO,25/05/2002,,N,9.0854885,45.71901089,Como
+19389,Umidità Relativa,%,1650,Bormio eliporto,1172,SO,29/09/2016,,N,10.36603171,46.45370081,Sondrio
+8017,Altezza Neve,cm,836,Aprica,1950,SO,01/01/1992,,N,10.14826598,46.12968795,Sondrio
+22022,Precipitazione,mm,1891,Porto Valtravaglia San Michele,875,VA,30/01/2020,,N,8.71373858,45.94458167,Varese
+32360,Radiazione Globale,W/m²,833,Gerola Alta Pescegallo,1875,SO,13/10/2017,,N,9.57112074,46.0261969,Sondrio
+14500,Temperatura,°C,1371,Brembilla,468,BG,19/03/2013,,N,9.60925258,45.81475229,Bergamo
+14529,Umidità Relativa,%,1375,Varano Borghi,241,VA,27/03/2013,,N,8.71232365,45.76639371,Varese
+10585,Precipitazione,mm,1274,Perledo P.zza della stazione,212,LC,01/07/2010,,N,9.28641942,46.01583272,Lecco
+8030,Umidità Relativa,%,848,Livigno La Vallaccia,2660,SO,11/09/1993,,N,10.18873661,46.47730866,Sondrio
+4025,Precipitazione,mm,142,Caiolo,274,SO,24/05/2002,,N,9.79251888,46.15492316,Sondrio
+115,Temperatura,°C,58,Carona Lago Fregabolgia,1955,BG,01/12/2001,,N,9.86305936,46.02444861,Bergamo
+14055,Umidità Relativa,%,1324,Limone sul Garda,75,BS,13/03/2012,,N,10.79005556,45.80683333,Brescia
+9100,Precipitazione,mm,1230,San Giacomo Filippo Lago Truzzo,2064,SO,09/01/2004,,N,9.31999148,46.36053879,Sondrio
+6434,Radiazione Globale,W/m²,586,Costa Volpino v.Nazionale,192,BG,26/07/1993,,N,10.09707131,45.82716061,Bergamo
+14241,Precipitazione,mm,1345,Piazzatorre,966,BG,13/10/2012,,N,9.69328479,45.99338359,Bergamo
+8025,Precipitazione,mm,847,Carona Carisole,1954,BG,01/07/1993,,N,9.79379959,46.03852339,Bergamo
+8190,Precipitazione,mm,908,Voghera v. Cambiaso,95,PV,04/03/2003,,N,9.01750575,44.9902815,Pavia
+17561,Precipitazione,mm,1879,Montichiari Boschetti,92,BS,13/12/2018,,N,10.41406192,45.40275984,Brescia
+17475,Radiazione Globale,W/m²,1545,San Siro Alpe Rescascìa,1285,CO,26/09/2018,,N,9.2383327,46.0719452,Como
+19022,Temperatura,°C,1422,Bergamo v.Maffei,249,BG,01/10/2013,,N,9.67466286,45.69520255,Bergamo
+9381,Umidità Relativa,%,1238,Val Masino S.Martino,943,SO,17/12/2008,,N,9.63217806,46.24144667,Sondrio
+4049,Precipitazione,mm,145,Darfo Boario Terme,222,BS,06/06/2002,18/07/2023,S,10.1773568,45.8746021,Brescia
+11007,Temperatura,°C,822,Valtorta,982,BG,10/11/2010,,N,9.53889086,45.97360719,Bergamo
+2275,Radiazione Globale,W/m²,119,San Giovanni Bianco Cornalita,622,BG,12/09/2003,,N,9.63912077,45.86969697,Bergamo
+2448,Umidità Relativa,%,133,Bema,958,SO,01/01/1993,,N,9.5693423,46.10552765,Sondrio
+19295,Precipitazione,mm,1514,Carenno centro sportivo,633,LC,18/07/2014,,N,9.46596925,45.8009939,Lecco
+8200,Temperatura,°C,865,Cantù Asnago,244,CO,29/04/2003,,N,9.10037269,45.71853181,Como
+9092,Precipitazione,mm,1212,Castione della Presolana,1180,BG,01/01/2004,,N,10.06332908,45.92845581,Bergamo
+9010,Temperatura,°C,1235,Cene Ponte,361,BG,04/10/2011,,N,9.8215332,45.78420692,Bergamo
+14120,Precipitazione,mm,1326,Toscolano-Maderno,70,BS,25/03/2012,,N,10.61687842,45.63641172,Brescia
+19355,Umidità Relativa,%,1561,Porto Ceresio campo sportivo,275,VA,23/12/2016,,N,8.89259411,45.89770026,Varese
+32384,Altezza Neve,cm,1382,Veddasca Monte Cadrigna,1302,VA,07/11/2017,,N,8.76881513,46.07182708,Varese
+31,Temperatura,°C,16,Valfurva Ghiacciaio dei Forni,2180,SO,03/05/1988,,N,10.55541386,46.42078875,Sondrio
+9828,Radiazione Globale,W/m²,848,Livigno La Vallaccia,2660,SO,11/09/1993,,N,10.18873661,46.47730866,Sondrio
+8013,Temperatura,°C,833,Gerola Alta Pescegallo,1875,SO,01/01/1992,,N,9.57112074,46.0261969,Sondrio
+8133,Temperatura,°C,819,Lozio,994,BS,21/11/2001,,N,10.25975254,45.98580874,Brescia
+8008,Temperatura,°C,835,Valdisotto Oga S. Colombano,2300,SO,01/01/1992,,N,10.30596404,46.45356516,Sondrio
+4043,Umidità Relativa,%,145,Darfo Boario Terme,222,BS,06/06/2002,18/07/2023,S,10.1773568,45.8746021,Brescia
+11984,Umidità Relativa,%,851,Treviso Bresciano Cavacca,1147,BS,10/01/2012,,N,10.49916675,45.72416486,Brescia
+9012,Temperatura,°C,1238,Val Masino S.Martino,943,SO,01/01/2004,,N,9.63217806,46.24144667,Sondrio
+9014,Temperatura,°C,1237,Monno,1728,BS,11/10/2004,,N,10.308807,46.25030272,Brescia
+9044,Altezza Neve,cm,1222,Cavargna,1100,CO,09/04/2004,,N,9.11084686,46.09155206,Como
+22571,Altezza Neve,cm,1955,Magasa Malga Corva,1244,BS,30/11/2023,,N,10.6275831109109,45.7740906088109,Brescia
+14519,Umidità Relativa,%,1372,Garzeno,581,CO,25/07/2013,,N,9.2478209,46.1321526,Como
+8198,Temperatura,°C,911,Lambrugo,273,CO,06/03/2003,,N,9.24444953,45.76194769,Como
+2245,Temperatura,°C,117,Edolo Ist.Meneghini,699,BS,01/01/1998,,N,10.33339293,46.17572375,Brescia
+19347,Precipitazione,mm,1560,Padenghe sul Garda v.Fondrini,187,BS,14/07/2016,,N,10.50612,45.518286,Brescia
+8007,Temperatura,°C,856,Fortunago,501,PV,01/01/1998,,N,9.19499417,44.91250111,Pavia
+17536,Umidità Relativa,%,60,Villa di Chiavenna,665,SO,26/06/2019,,N,9.51204364,46.33199472,Sondrio
+2364,Radiazione Globale,W/m²,125,Castello d'Agogna,106,PV,21/07/1998,,N,8.70057165,45.24680044,Pavia
+8173,Precipitazione,mm,905,Cevo,1128,BS,18/06/2003,,N,10.37778231,46.08055608,Brescia
+10777,Radiazione Globale,W/m²,16,Valfurva Ghiacciaio dei Forni,2180,SO,09/08/2022,,N,10.55541386,46.42078875,Sondrio
+19309,Precipitazione,mm,1518,Dubino La Piazza,993,SO,21/11/2014,,N,9.45812983,46.16725553,Sondrio
+8172,Precipitazione,mm,877,Bovegno ponte Zigole,572,BS,06/06/2001,,N,10.26318272,45.78138436,Brescia
+14207,Radiazione Globale,W/m²,1343,Lanzada Passo Marinelli,3032,SO,13/10/2012,,N,9.91515411,46.34981046,Sondrio
+6432,Radiazione Globale,W/m²,596,Osio Sotto v.per Levate,182,BG,04/04/2000,,N,9.61173782,45.62055568,Bergamo
+14476,Precipitazione,mm,1367,Bagolino SP669,775,BS,12/12/2012,,N,10.452199,45.83860244,Brescia
+14218,Umidità Relativa,%,1343,Lanzada Passo Marinelli,3032,SO,13/10/2012,,N,9.91515411,46.34981046,Sondrio
+2084,Radiazione Globale,W/m²,106,Varzi Nivione,500,PV,12/09/2003,,N,9.17949163,44.80739989,Pavia
+8145,Temperatura,°C,889,Torre Boldone,311,BG,21/11/2001,,N,9.71018546,45.71897778,Bergamo
+8020,Altezza Neve,cm,846,Edolo Pantano d`Avio,2108,BS,01/05/1993,,N,10.47282844,46.17700799,Brescia
+14648,Umidità Relativa,%,1382,Veddasca Monte Cadrigna,1302,VA,19/07/2013,,N,8.76881513,46.07182708,Varese
+14178,Altezza Neve,cm,1342,Ponte in Valtellina Lago Reguzzo,2440,SO,13/10/2012,,N,9.96999939,46.09651358,Sondrio
+5857,Precipitazione,mm,594,Bergamo v.Goisis,290,BG,09/07/1996,,N,9.68896994,45.71591825,Bergamo
+9113,Precipitazione,mm,1221,Casnigo Campo Sportivo,502,BG,18/02/2004,,N,9.86559107,45.81136488,Bergamo
+14384,Precipitazione,mm,1360,Clusone SP 671,564,BG,21/11/2012,,N,9.93314133,45.88094706,Bergamo
+9024,Temperatura,°C,1221,Casnigo Campo Sportivo,502,BG,18/02/2004,,N,9.86559107,45.81136488,Bergamo
+19428,Precipitazione,mm,1657,Mariano Comense campo sportivo,255,CO,11/10/2017,,N,9.177773,45.684884,Como
+7028,Radiazione Globale,W/m²,687,Ferno v.Di Dio,215,VA,21/11/2006,,N,8.75697656,45.61924753,Varese
+2441,Precipitazione,mm,132,Bergamo v.Stezzano,211,BG,15/10/1990,,N,9.65876847,45.66051928,Bergamo
+9123,Precipitazione,mm,1209,Rota d'Imagna,674,BG,02/01/2004,,N,9.51135208,45.83984475,Bergamo
+117,Altezza Neve,cm,58,Carona Lago Fregabolgia,1955,BG,01/12/2001,,N,9.86305936,46.02444861,Bergamo
+17527,Radiazione Globale,W/m²,874,Sarnico v. Roma,197,BG,21/10/2018,,N,9.95688896,45.66594103,Bergamo
+53,Temperatura,°C,28,Chiesa in Valmalenco Alpe Entova,1905,SO,28/10/1989,,N,9.83412892,46.32141817,Sondrio
+2434,Umidità Relativa,%,132,Bergamo v.Stezzano,211,BG,01/01/1993,,N,9.65876847,45.66051928,Bergamo
+17612,Altezza Neve,cm,1545,San Siro Alpe Rescascìa,1285,CO,07/11/2019,,N,9.2383327,46.0719452,Como
+10376,Precipitazione,mm,706,Lecco v.Sora,272,LC,22/07/2008,,N,9.39995481,45.86375372,Lecco
+32262,Umidità Relativa,%,833,Gerola Alta Pescegallo,1875,SO,27/10/2016,,N,9.57112074,46.0261969,Sondrio
+17451,Temperatura,°C,1871,Tavernola Bergamasca Gallinarga,185,BG,27/11/2018,,N,10.05422004,45.6963302,Bergamo
+14399,Temperatura,°C,1365,Bione,911,BS,18/11/2012,,N,10.32736288,45.66721826,Brescia
+14018,Precipitazione,mm,1077,Oltre il Colle Zambla,1138,BG,13/01/2012,,N,9.78893967,45.89119304,Bergamo
+10554,Precipitazione,mm,554,Saronno v.Santuario,212,VA,06/07/2010,,N,9.02640138,45.62735705,Varese
+17443,Temperatura,°C,1692,Bienno Piazze,472,BS,13/07/2018,,N,10.29124095,45.92751023,Brescia
+9391,Umidità Relativa,%,1218,Ardesio Valcanale,1002,BG,18/12/2008,,N,9.863434,45.95056364,Bergamo
+17473,Radiazione Globale,W/m²,1679,Sormano rifugio Alpetto,1158,CO,26/09/2018,,N,9.23506881,45.90514139,Como
+17583,Umidità Relativa,%,847,Carona Carisole,1954,BG,20/08/2016,,N,9.79379959,46.03852339,Bergamo
+14364,Altezza Neve,cm,1359,Breno Lago Della Vacca,2410,BS,09/12/2012,,N,10.4427287,45.95749967,Brescia
+17565,Radiazione Globale,W/m²,1879,Montichiari Boschetti,92,BS,13/12/2018,,N,10.41406192,45.40275984,Brescia
+14238,Umidità Relativa,%,1345,Piazzatorre,966,BG,13/10/2012,,N,9.69328479,45.99338359,Bergamo
+17432,Temperatura,°C,1862,Broni,77,PV,22/03/2018,,N,9.22386082,45.04448039,Pavia
+14518,Temperatura,°C,1372,Garzeno,581,CO,25/07/2013,,N,9.2478209,46.1321526,Como
+14320,Umidità Relativa,%,823,Piazza Brembana vivaio,510,BG,21/10/2012,,N,9.67277767,45.94611233,Bergamo
+9119,Precipitazione,mm,1218,Ardesio Valcanale,1002,BG,01/01/2004,,N,9.863434,45.95056364,Bergamo
+2361,Temperatura,°C,125,Castello d'Agogna,106,PV,01/01/1993,,N,8.70057165,45.24680044,Pavia
+2417,Precipitazione,mm,130,Brescia ITAS Pastori,149,BS,11/10/1990,,N,10.26138219,45.52614578,Brescia
+4045,Radiazione Globale,W/m²,145,Darfo Boario Terme,222,BS,06/06/2002,18/07/2023,S,10.1773568,45.8746021,Brescia
+8111,Precipitazione,mm,818,Gera Lario Fuentes,199,CO,01/01/1998,,N,9.41227503,46.15033242,Como
+56,Temperatura,°C,33,Lanzada Ganda,988,SO,10/11/1989,,N,9.884505,46.270224,Sondrio

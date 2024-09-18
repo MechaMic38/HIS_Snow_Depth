@@ -1,0 +1,1645 @@
+---
+title: "Station Analysis"
+output: html_notebook
+---
+
+# 1. Imports
+
+```{r, include=FALSE}
+library(corrplot)
+library(patchwork)
+library(tidyverse)
+library(sf)
+Sys.setlocale("LC_TIME", "en_US")
+```
+
+## 1.1 Readings datasets
+
+Let's start by importing the processed station readings:
+
+```{r}
+station_readings <- read.csv(
+    "processed_dataset/Letture_Stazioni_dal_01062023_al_01062024.csv",
+    header = TRUE,
+    strip.white = TRUE,
+    na.strings = c("-999")
+)
+station_readings
+```
+
+Let's apply some small preprocessing to the imported dataset:
+
+```{r}
+station_readings <- station_readings |>
+    mutate(
+        IdStazione = as.factor(IdStazione),
+        Data = ymd(Data),
+    )
+```
+
+## 1.2 Sensors/stations dataset
+
+We also need the processed Lombardy stations for the analysis:
+
+```{r}
+sensors <- read.csv(
+    "processed_dataset//Stazioni_Idro_Nivo_Meteorologiche.csv",
+    header = TRUE,
+    strip.white = TRUE
+)
+```
+
+Let's apply some small preprocessing to the imported dataset:
+
+```{r}
+stations <- sensors |>
+    select(
+        IdStazione,
+        NomeStazione,
+        Quota,
+        Provincia,
+        NomeProvincia,
+        lng, lat
+    ) |>
+    distinct(IdStazione, .keep_all = TRUE) |>
+    mutate(
+        IdStazione = as.factor(IdStazione),
+        Provincia = as.factor(Provincia),
+    )
+```
+
+
+# 2. Station Evolution
+
+Let's add month information to the readings:
+
+```{r}
+station_readings <- station_readings |>
+    mutate(Month = month(Data, label=TRUE, abbr=FALSE))
+```
+
+Join the readings dataset with the stations dataset:
+
+```{r}
+station_data <- left_join(
+    station_readings,
+    stations,
+    join_by(IdStazione == IdStazione)
+)
+```
+
+## 2.1 Correlation (daily)
+
+Let's try to understand what could be related to the evolution of the snow height, by drawing a correlation plot. We first need to compute the correlation matrix on the desired features:
+
+```{r}
+station_data_tmp <- station_data |>
+    select(
+        MediaAltezzaNeve,
+        MediaIrraggiamento,
+        MediaTemperatura,
+        MediaUmidità,
+        TotPrecipitazione,
+        Quota
+    )
+
+station_cor = cor(station_data_tmp, use = "complete.obs")
+```
+
+Finally, we just need to plot the correlation graph:
+
+```{r}
+col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
+
+corrplot(station_cor, method = "shade", shade.col = NA, tl.col = "black", tl.srt = 45,
+         col = col(200), addCoef.col = "black", cl.pos = "n", order = "AOE")
+```
+
+Strange, precipitation and snow height don't seem to be correlated at all. Might just be due to multiple additional factors, like altitude or season.
+
+## 2.2 Correlation (monthly)
+
+Let's try to understand what could be related to the evolution of the snow height, by drawing a correlation plot. Let's first compute the monthly readings for each station:
+
+```{r}
+monthly_station_data <- station_data |>
+    group_by(IdStazione, Year = year(Data), Month = month(Data)) |>
+    summarise(
+        MediaAltezzaNeve = if (all(is.na(MediaAltezzaNeve))) NA else round(mean(MediaAltezzaNeve, na.rm = TRUE)),
+        MinAltezzaNeve = if (all(is.na(MinAltezzaNeve))) NA else min(MinAltezzaNeve, na.rm = TRUE),
+        MaxAltezzaNeve = if (all(is.na(MaxAltezzaNeve))) NA else max(MaxAltezzaNeve, na.rm = TRUE),
+        MediaIrraggiamento = if (all(is.na(MediaIrraggiamento))) NA else round(mean(MediaIrraggiamento, na.rm = TRUE)),
+        MediaTemperatura = if (all(is.na(MediaTemperatura))) NA else round(mean(MediaTemperatura, na.rm = TRUE), digits = 1),
+        MinTemperatura = if (all(is.na(MinTemperatura))) NA else min(MinTemperatura, na.rm = TRUE),
+        MaxTemperatura = if (all(is.na(MaxTemperatura))) NA else max(MaxTemperatura, na.rm = TRUE),
+        MediaUmidità = if (all(is.na(MediaUmidità))) NA else round(mean(MediaUmidità, na.rm = TRUE)),
+        MinUmidità = if (all(is.na(MinUmidità))) NA else min(MinUmidità, na.rm = TRUE),
+        MaxUmidità = if (all(is.na(MaxUmidità))) NA else max(MaxUmidità, na.rm = TRUE),
+        MediaPrecipitazione = if (all(is.na(TotPrecipitazione))) NA else round(mean(TotPrecipitazione, na.rm = TRUE), digits = 1),
+        TotPrecipitazione = if (all(is.na(TotPrecipitazione))) NA else sum(TotPrecipitazione, na.rm = TRUE),
+        .groups = "drop"
+    ) |>
+    mutate(
+        Data = make_date(year = Year, month = Month)
+    )
+
+monthly_station_data <- monthly_station_data |> left_join(stations, by = "IdStazione")
+```
+
+```{r}
+# Create a new column for month-year labels
+monthly_station_data <- monthly_station_data %>%
+    mutate(
+        MonthLabel = case_when(
+            Month == 6 & Year == 2023 ~ "Jun\n2023",
+            Month == 7 & Year == 2023 ~ "Jul",
+            Month == 8 & Year == 2023 ~ "Aug",
+            Month == 9 & Year == 2023 ~ "Sep",
+            Month == 10 & Year == 2023 ~ "Oct",
+            Month == 11 & Year == 2023 ~ "Nov",
+            Month == 12 & Year == 2023 ~ "Dec",
+            Month == 1 & Year == 2024 ~ "Jan\n2024",
+            Month == 2 & Year == 2024 ~ "Feb",
+            Month == 3 & Year == 2024 ~ "Mar",
+            Month == 4 & Year == 2024 ~ "Apr",
+            Month == 5 & Year == 2024 ~ "May"
+        )
+    )
+
+# Ensure the month-year labels are in the correct order
+monthly_station_data$MonthLabel <- factor(
+    monthly_station_data$MonthLabel,
+    levels = c(
+        "Jun\n2023", "Jul", "Aug", "Sep",
+         "Oct", "Nov", "Dec", "Jan\n2024",
+         "Feb", "Mar", "Apr", "May"
+    )
+)
+```
+
+
+We first need to compute the correlation matrix on the desired features:
+
+```{r}
+station_data_tmp <- monthly_station_data |>
+    select(
+        MediaAltezzaNeve,
+        MediaIrraggiamento,
+        MediaTemperatura,
+        MediaUmidità,
+        TotPrecipitazione,
+        Quota
+    )
+
+station_cor = cor(station_data_tmp, use = "complete.obs")
+```
+
+Finally, we just need to plot the correlation graph:
+
+```{r}
+col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
+
+corrplot(station_cor, method = "shade", shade.col = NA, tl.col = "black", tl.srt = 45,
+         col = col(200), addCoef.col = "black", cl.pos = "n", order = "AOE")
+```
+
+# 3. Temperature
+
+Let's try to plot for reference snow depth and precipitation on station `1342`, monthly:
+
+```{r}
+min_snow <- min(monthly_station_data$MediaAltezzaNeve, na.rm = TRUE)
+max_snow <- max(monthly_station_data$MediaAltezzaNeve, na.rm = TRUE)
+snow_range <- max_snow - min_snow
+
+min_temp <- min(monthly_station_data$MinTemperatura, na.rm = TRUE)
+max_temp <- max(monthly_station_data$MaxTemperatura, na.rm = TRUE)
+temp_range <- max_temp - min_temp
+
+gg_temp_snow_lago_reguzzo <- monthly_station_data |>
+    filter(IdStazione == 1342) |>
+    mutate(
+        SensorLabel = paste(IdStazione, " | ", NomeStazione, " (", Quota, "m)", sep = "")
+    ) |>
+    ggplot(
+        aes(x = Data)
+    ) +
+    geom_hline(
+        yintercept = 0, 
+        linetype = "dashed", 
+        color = "#F26D6D"
+    ) +
+    geom_point(
+        aes(y = MediaTemperatura * (snow_range / temp_range), color = "Avg. Temperature"),  # Rescale temperature
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaTemperatura * (snow_range / temp_range), color = "Avg. Temperature")   # Rescale temperature
+    ) +
+    geom_line(
+        aes(y = MinTemperatura * (snow_range / temp_range), color = "Min/Max Temperature"),   # Rescale temperature
+        linetype = "dotted"
+    ) +
+    geom_line(
+        aes(y = MaxTemperatura * (snow_range / temp_range), color = "Min/Max Temperature"),   # Rescale temperature
+        linetype = "dotted"
+    ) +
+    geom_point(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth")
+    ) +
+    facet_wrap(
+        . ~ SensorLabel,
+        ncol = 3
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    scale_y_continuous(
+        name = "Snow Depth (cm)",
+        sec.axis = sec_axis(~ . * (temp_range / snow_range), name = "Temperature (°C)")
+    ) +
+    scale_color_manual(
+        values = c(
+            "Avg. Snow Depth" = "#756BB1",
+            "Avg. Temperature" = "#DE2D26",
+            "Min/Max Temperature" = "#DE2D26"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        axis.text.y = element_text(size = 8),
+        legend.text = element_text(size = 12),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+gg_temp_snow_lago_reguzzo
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/temp_snow_lago_reguzzo.jpg",
+    plot = gg_temp_snow_lago_reguzzo,
+    width = 24,
+    height = 10,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+## 3.1 By Altitude
+
+Let's try to visualize the correlation between snow and temperature at different altitudes:
+
+```{r}
+gg_temp_snow_scatter <- monthly_station_data |>
+    ggplot(
+        aes(x = MediaTemperatura, y = MediaAltezzaNeve)
+    ) +
+    geom_point(
+        aes(color = Quota),
+        alpha = 0.6
+    ) +
+    geom_smooth(
+        method = "lm", se = FALSE,
+        color = "gray20", linetype = "dashed"
+    ) +
+    labs(
+        x = "Average Monthly Temperature (°C)",
+        y = "Average Monthly Snow Depth (cm)",
+        color = "Altitude (m)"
+    ) +
+    scale_colour_distiller(palette = "Spectral") +
+    scale_x_continuous(limits = c(-8, 10)) +
+    guides(
+        colour = guide_colourbar(
+            barwidth = unit(16, "cm"),
+        )
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        legend.title = element_text(vjust = 0.8),
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank()
+    )
+gg_temp_snow_scatter
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/temp_snow_scatter.jpg",
+    plot = gg_temp_snow_scatter,
+    width = 20,
+    height = 12,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+Interesting, looks like temperature has less impact on snow depth at higher elevations.
+
+```{r}
+station_data$AltitudeRange <- cut(
+    station_data$Quota,
+    breaks = seq(0, 3200, by = 800),
+    labels = c("0-800m", "800-1600m", "1600-2400m", "2400-3200m")
+)
+
+monthly_altitude_data <- station_data |>
+    group_by(AltitudeRange, year = year(Data), month = month(Data)) |>
+    summarise(
+        MediaAltezzaNeve = if (all(is.na(MediaAltezzaNeve))) NA else round(mean(MediaAltezzaNeve, na.rm = TRUE)),
+        MinAltezzaNeve = if (all(is.na(MinAltezzaNeve))) NA else min(MinAltezzaNeve, na.rm = TRUE),
+        MaxAltezzaNeve = if (all(is.na(MaxAltezzaNeve))) NA else max(MaxAltezzaNeve, na.rm = TRUE),
+        MediaIrraggiamento = if (all(is.na(MediaIrraggiamento))) NA else round(mean(MediaIrraggiamento, na.rm = TRUE)),
+        MediaTemperatura = if (all(is.na(MediaTemperatura))) NA else round(mean(MediaTemperatura, na.rm = TRUE), digits = 1),
+        MinTemperatura = if (all(is.na(MinTemperatura))) NA else min(MinTemperatura, na.rm = TRUE),
+        MaxTemperatura = if (all(is.na(MaxTemperatura))) NA else max(MaxTemperatura, na.rm = TRUE),
+        MediaUmidità = if (all(is.na(MediaUmidità))) NA else round(mean(MediaUmidità, na.rm = TRUE)),
+        MediaPrecipitazione = if (all(is.na(TotPrecipitazione))) NA else round(mean(TotPrecipitazione, na.rm = TRUE), digits = 1),
+        TotPrecipitazione = if (all(is.na(TotPrecipitazione))) NA else sum(TotPrecipitazione, na.rm = TRUE),
+        .groups = "drop"
+    ) |>
+    mutate(
+        Data = make_date(year = year, month = month)
+    )
+```
+
+Let's plot average monthly snow depth and temperature based on the altitude range:
+
+```{r}
+min_snow <- min(monthly_altitude_data$MediaAltezzaNeve, na.rm = TRUE)
+max_snow <- max(monthly_altitude_data$MediaAltezzaNeve, na.rm = TRUE)
+snow_range <- max_snow - min_snow
+
+min_temp <- min(monthly_altitude_data$MinTemperatura, na.rm = TRUE)
+max_temp <- max(monthly_altitude_data$MaxTemperatura, na.rm = TRUE)
+temp_range <- max_temp - min_temp
+
+gg_temp_snow_altitude <- monthly_altitude_data |>
+    ggplot(
+        aes(x = Data)
+    ) +
+    geom_hline(
+        yintercept = 0, 
+        linetype = "dashed", 
+        color = "#F26D6D"
+    ) +
+    geom_point(
+        aes(y = MediaTemperatura * (snow_range / temp_range), color = "Avg. Temperature"),  # Rescale temperature
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaTemperatura * (snow_range / temp_range), color = "Avg. Temperature")   # Rescale temperature
+    ) +
+    geom_line(
+        aes(y = MinTemperatura * (snow_range / temp_range), color = "Min/Max Temperature"),   # Rescale temperature
+        linetype = "dotted"
+    ) +
+    geom_line(
+        aes(y = MaxTemperatura * (snow_range / temp_range), color = "Min/Max Temperature"),   # Rescale temperature
+        linetype = "dotted"
+    ) +
+    geom_point(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth")
+    ) +
+    facet_wrap(
+        . ~ AltitudeRange,
+        ncol = 3
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    scale_y_continuous(
+        name = "Snow Depth (cm)",
+        sec.axis = sec_axis(~ . * (temp_range / snow_range), name = "Temperature (°C)")  # Secondary y-axis for temperature
+    ) +
+    scale_color_manual(
+        values = c(
+            "Avg. Snow Depth" = "#756BB1",
+            "Avg. Temperature" = "#F26D6D",
+            "Min/Max Temperature" = "#F26D6D"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        axis.text.y = element_text(size = 8),
+        legend.text = element_text(size = 12),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+gg_temp_snow_altitude
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/temp_snow_altitude.jpg",
+    plot = gg_temp_snow_altitude,
+    width = 24,
+    height = 8,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+## 3.2 By province
+
+Before proceeding, let's compute average monthly values also for each province:
+
+```{r}
+monthly_province_data <- station_data |>
+    group_by(Provincia, NomeProvincia, year = year(Data), month = month(Data)) |>
+    summarise(
+        MediaAltezzaNeve = if (all(is.na(MediaAltezzaNeve))) NA else round(mean(MediaAltezzaNeve, na.rm = TRUE)),
+        MinAltezzaNeve = if (all(is.na(MinAltezzaNeve))) NA else min(MinAltezzaNeve, na.rm = TRUE),
+        MaxAltezzaNeve = if (all(is.na(MaxAltezzaNeve))) NA else max(MaxAltezzaNeve, na.rm = TRUE),
+        MediaIrraggiamento = if (all(is.na(MediaIrraggiamento))) NA else round(mean(MediaIrraggiamento, na.rm = TRUE)),
+        MediaTemperatura = if (all(is.na(MediaTemperatura))) NA else round(mean(MediaTemperatura, na.rm = TRUE), digits = 1),
+        MinTemperatura = if (all(is.na(MinTemperatura))) NA else min(MinTemperatura, na.rm = TRUE),
+        MaxTemperatura = if (all(is.na(MaxTemperatura))) NA else max(MaxTemperatura, na.rm = TRUE),
+        MediaUmidità = if (all(is.na(MediaUmidità))) NA else round(mean(MediaUmidità, na.rm = TRUE)),
+        MediaPrecipitazione = if (all(is.na(TotPrecipitazione))) NA else round(mean(TotPrecipitazione, na.rm = TRUE), digits = 1),
+        TotPrecipitazione = if (all(is.na(TotPrecipitazione))) NA else sum(TotPrecipitazione, na.rm = TRUE),
+        .groups = "drop"
+    ) |>
+    mutate(
+        Data = make_date(year = year, month = month)
+    )
+```
+
+Now, let's plot both snow depth and temperature for each province:
+
+```{r}
+min_snow <- min(monthly_province_data$MediaAltezzaNeve, na.rm = TRUE)
+max_snow <- max(monthly_province_data$MediaAltezzaNeve, na.rm = TRUE)
+snow_range <- max_snow - min_snow
+
+min_temp <- min(monthly_province_data$MinTemperatura, na.rm = TRUE)
+max_temp <- max(monthly_province_data$MaxTemperatura, na.rm = TRUE)
+temp_range <- max_temp - min_temp
+
+gg_temp_snow_province <- monthly_province_data |>
+    mutate(
+        NomeProvincia = paste(NomeProvincia, " (", Provincia, ")", sep = "")
+    ) |>
+    ggplot(
+        aes(x = Data)
+    ) +
+    geom_hline(
+        yintercept = 0, 
+        linetype = "dashed", 
+        color = "#F26D6D"
+    ) +
+    geom_point(
+        aes(y = MediaTemperatura * (snow_range / temp_range), color = "Avg. Temperature"),  # Rescale temperature
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaTemperatura * (snow_range / temp_range), color = "Avg. Temperature")   # Rescale temperature
+    ) +
+    geom_line(
+        aes(y = MinTemperatura * (snow_range / temp_range), color = "Min/Max Temperature"),   # Rescale temperature
+        linetype = "dotted"
+    ) +
+    geom_line(
+        aes(y = MaxTemperatura * (snow_range / temp_range), color = "Min/Max Temperature"),   # Rescale temperature
+        linetype = "dotted"
+    ) +
+    geom_point(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth")
+    ) +
+    facet_wrap(
+        . ~ NomeProvincia,
+        ncol = 3
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    scale_y_continuous(
+        name = "Snow Depth (cm)",
+        sec.axis = sec_axis(~ . * (temp_range / snow_range), name = "Temperature (°C)")  # Secondary y-axis for temperature
+    ) +
+    scale_color_manual(
+        values = c(
+            "Avg. Snow Depth" = "#756BB1",
+            "Avg. Temperature" = "#F26D6D",
+            "Min/Max Temperature" = "#F26D6D"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        axis.text.y = element_text(size = 8),
+        legend.text = element_text(size = 12),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+gg_temp_snow_province
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/temp_snow_province.jpg",
+    plot = gg_temp_snow_province,
+    width = 24,
+    height = 14,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+# 4. Precipitation
+
+Let's try to plot for reference snow depth and precipitation on station `1342`, daily and monthly:
+
+```{r}
+station_data_tmp <- station_data |>
+    filter(IdStazione == 1342)
+monthly_station_data_tmp <- monthly_station_data |>
+    filter(IdStazione == 1342)
+
+min_snow <- min(station_data_tmp$MediaAltezzaNeve, na.rm = TRUE)
+max_snow <- max(station_data_tmp$MediaAltezzaNeve, na.rm = TRUE)
+snow_range <- max_snow - min_snow
+
+min_prcp <- min(station_data_tmp$TotPrecipitazione, na.rm = TRUE)
+max_prcp <- max(station_data_tmp$TotPrecipitazione, na.rm = TRUE)
+prcp_range <- max_prcp - min_prcp
+
+gg_monthly <- monthly_station_data_tmp |>
+    mutate(
+        SensorLabel = paste(IdStazione, " | ", NomeStazione, " (", Quota, "m)", sep = "")
+    ) |>
+    ggplot(
+        aes(x = Data)
+    ) +
+    geom_point(
+        aes(y = MediaPrecipitazione * (snow_range / prcp_range), color = "Avg. Precipitation"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaPrecipitazione * (snow_range / prcp_range), color = "Avg. Precipitation")
+    ) +
+    geom_point(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth")
+    ) +
+    geom_text(
+        aes(
+            y = MediaPrecipitazione * (snow_range / prcp_range),
+            label = round(MediaPrecipitazione, digits = 1)
+        ),
+        vjust = -1,
+        size = 3.5,
+        color = "#3182BD"
+    ) +
+    facet_wrap(
+        . ~ SensorLabel,
+        ncol = 2
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    scale_y_continuous(
+        name = "Snow Depth (cm)",
+        limits = c(0, max_snow),
+        sec.axis = sec_axis(~ . * (prcp_range / snow_range), name = "Precipitation (mm/day)")
+    ) +
+    scale_color_manual(
+        values = c(
+            "Avg. Snow Depth" = "#756BB1",
+            "Avg. Precipitation" = "#3182BD"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        axis.text.y = element_text(size = 8),
+        legend.text = element_text(size = 12),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+
+gg_daily <- station_data_tmp |>
+    mutate(
+        SensorLabel = paste(IdStazione, " | ", NomeStazione, " (", Quota, "m)", sep = "")
+    ) |>
+    ggplot(
+        aes(x = Data)
+    ) +
+    geom_line(
+        aes(y = TotPrecipitazione * (snow_range / prcp_range), color = "Tot. Precipitation")
+    ) +
+    geom_line(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth")
+    ) +
+    facet_wrap(
+        . ~ SensorLabel,
+        ncol = 2
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    scale_y_continuous(
+        name = "Snow Depth (cm)",
+        limits = c(0, max_snow),
+        sec.axis = sec_axis(~ . * (prcp_range / snow_range), name = "Precipitation (mm)")
+    ) +
+    scale_color_manual(
+        values = c(
+            "Avg. Snow Depth" = "#756BB1",
+            "Tot. Precipitation" = "#3182BD"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        axis.text.y = element_text(size = 8),
+        legend.text = element_text(size = 12),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+
+gg_daily + gg_monthly
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/prcp_snow_lago_reguzzo.jpg",
+    plot = gg_daily + gg_monthly,
+    width = 24,
+    height = 10,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+Let's draw a climograph to visualize the relationship between temperatures and precipitation at station:
+
+```{r}
+monthly_station_data_tmp <- monthly_station_data |>
+    filter(IdStazione == 1342)
+
+min_temp <- min(monthly_station_data_tmp$MinTemperatura, na.rm = TRUE)
+max_temp <- max(monthly_station_data_tmp$MaxTemperatura, na.rm = TRUE)
+temp_range <- max_temp - min_temp
+
+min_prcp <- min(monthly_station_data_tmp$TotPrecipitazione, na.rm = TRUE)
+max_prcp <- max(monthly_station_data_tmp$TotPrecipitazione, na.rm = TRUE)
+prcp_range <- max_prcp - min_prcp
+
+gg_climograph_lago_reguzzo <- monthly_station_data_tmp |>
+    mutate(
+        SensorLabel = paste(IdStazione, " | ", NomeStazione, " (", Quota, "m)", sep = "")
+    ) |>
+    ggplot(
+        aes(x = MonthLabel)
+    ) +
+    geom_hline(
+        yintercept = 0, 
+        color = "gray20"
+    ) +
+    geom_col(
+        aes(
+            y = TotPrecipitazione * (temp_range / prcp_range),
+            fill = "Tot. Precipitation"
+        ),
+        color = "#3182BD",
+        alpha = 0.7
+    ) +
+    geom_line(
+        aes(y = MediaTemperatura, color = "Avg. Temperature", group = 1),
+        size = 1
+    ) +
+    geom_point(
+        aes(y = MediaTemperatura, color = "Avg. Temperature"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MinTemperatura, color = "Min/Max Temperature", group = 2),
+        linetype = "dotted",
+        size = 1
+    ) +
+    geom_line(
+        aes(y = MaxTemperatura, color = "Min/Max Temperature", group = 3),
+        linetype = "dotted",
+        size = 1
+    ) +
+    geom_text(
+        aes(
+            y = TotPrecipitazione * (temp_range / prcp_range),
+            label = round(TotPrecipitazione, digits = 1)
+        ),
+        vjust = -0.5,
+        size = 3.5,
+        color = "#3182BD"
+    ) +
+    facet_wrap(
+        . ~ SensorLabel,
+        ncol = 3
+    ) +
+    scale_y_continuous(
+        name = "Temperature (°C)",
+        limits = c(-17, 38),
+        sec.axis = sec_axis(~ . * (prcp_range / temp_range), name = "Precipitation (mm)")
+    ) +
+    scale_color_manual(
+        values = c(
+            "Avg. Temperature" = "#DE2D26",
+            "Min/Max Temperature" = "#DE2D26"
+        )
+    ) +
+    scale_fill_manual(
+        values = c(
+            "Tot. Precipitation" = "#3182BD"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        color = element_blank(),
+        fill = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        axis.text.y = element_text(size = 8),
+        legend.text = element_text(size = 12),
+        axis.title.y.left = element_text(color = "#DE2D26"),
+        axis.text.y.left = element_text(color = "#DE2D26"),
+        axis.title.y.right = element_text(color = "#3182BD"),
+        axis.text.y.right = element_text(color = "#3182BD"),
+        panel.grid.major.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+gg_climograph_lago_reguzzo
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/climograph_lago_reguzzo.jpg",
+    plot = gg_climograph_lago_reguzzo,
+    width = 24,
+    height = 12,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+## 4.1 By Altitude
+
+Let's plot average monthly snow depth and precipitation based on the altitude range:
+
+```{r}
+min_snow <- min(monthly_altitude_data$MediaAltezzaNeve, na.rm = TRUE)
+max_snow <- max(monthly_altitude_data$MediaAltezzaNeve, na.rm = TRUE)
+snow_range <- max_snow - min_snow
+
+min_prcp <- min(monthly_altitude_data$MediaPrecipitazione, na.rm = TRUE)
+max_prcp <- max(monthly_altitude_data$MediaPrecipitazione, na.rm = TRUE)
+prcp_range <- max_prcp - min_prcp
+
+gg_prcp_snow_altitude <- monthly_altitude_data |>
+    ggplot(
+        aes(x = Data)
+    ) +
+    geom_point(
+        aes(y = MediaPrecipitazione * (snow_range / prcp_range), color = "Avg. Precipitation"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaPrecipitazione * (snow_range / prcp_range), color = "Avg. Precipitation")
+    ) +
+    geom_point(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth")
+    ) +
+    geom_line(
+        aes(y = MinAltezzaNeve, color = "Min/Max Snow Depth"),
+        linetype = "dotted"
+    ) +
+    geom_line(
+        aes(y = MaxAltezzaNeve, color = "Min/Max Snow Depth"),
+        linetype = "dotted"
+    ) +
+    facet_wrap(
+        . ~ AltitudeRange,
+        ncol = 3
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    scale_y_continuous(
+        name = "Snow Depth (cm)",
+        sec.axis = sec_axis(~ . * (prcp_range / snow_range), name = "Precipitation (mm/day)")
+    ) +
+    scale_color_manual(
+        values = c(
+            "Avg. Snow Depth" = "#756BB1",
+            "Avg. Precipitation" = "#3182BD",
+            "Min/Max Snow Depth" = "#3182BD"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        axis.text.y = element_text(size = 8),
+        legend.text = element_text(size = 12),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+gg_prcp_snow_altitude
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/prcp_snow_altitude.jpg",
+    plot = gg_prcp_snow_altitude,
+    width = 24,
+    height = 8,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+## 4.2 By Province
+
+Now, let's plot both snow depth and precipitation for each province:
+
+```{r}
+min_snow <- min(monthly_province_data$MinAltezzaNeve, na.rm = TRUE)
+max_snow <- max(monthly_province_data$MaxAltezzaNeve, na.rm = TRUE)
+snow_range <- max_snow - min_snow
+
+min_prcp <- min(monthly_province_data$MediaPrecipitazione, na.rm = TRUE)
+max_prcp <- max(monthly_province_data$MediaPrecipitazione, na.rm = TRUE)
+prcp_range <- max_prcp - min_prcp
+
+monthly_province_data |>
+    ggplot(
+        aes(x = Data)
+    ) +
+    geom_point(
+        aes(y = MediaPrecipitazione * (snow_range / prcp_range), color = "Avg. Precipitation"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaPrecipitazione * (snow_range / prcp_range), color = "Avg. Precipitation")
+    ) +
+    geom_point(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth")
+    ) +
+    geom_line(
+        aes(y = MinAltezzaNeve, color = "Min/Max Snow Depth"),
+        linetype = "dotted"
+    ) +
+    geom_line(
+        aes(y = MaxAltezzaNeve, color = "Min/Max Snow Depth"),
+        linetype = "dotted"
+    ) +
+    facet_wrap(
+        . ~ Provincia,
+        ncol = 3
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    scale_y_continuous(
+        name = "Snow Depth (cm)",
+        sec.axis = sec_axis(~ . * (prcp_range / snow_range), name = "Precipitation (mm/day)")
+    ) +
+    scale_color_manual(
+        values = c(
+            "Avg. Snow Depth" = "#756BB1",
+            "Avg. Precipitation" = "#3182BD",
+            "Min/Max Snow Depth" = "#3182BD"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        axis.text.y = element_text(size = 8),
+        legend.text = element_text(size = 12),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+```
+
+# 5. Solar Irradiance
+
+Let's try to plot for reference snow depth and solar irradiance on station `1343`, monthly:
+
+```{r}
+min_snow <- min(monthly_station_data$MediaAltezzaNeve, na.rm = TRUE)
+max_snow <- max(monthly_station_data$MediaAltezzaNeve, na.rm = TRUE)
+snow_range <- max_snow - min_snow
+
+min_irrad <- min(monthly_station_data$MediaIrraggiamento, na.rm = TRUE)
+max_irrad <- max(monthly_station_data$MediaIrraggiamento, na.rm = TRUE)
+irrad_range <- max_irrad - min_irrad
+
+monthly_station_data |>
+    filter(IdStazione == 1343) |>
+    mutate(
+        SensorLabel = paste(IdStazione, " | ", NomeStazione, " (", Quota, "m)", sep = "")
+    ) |>
+    ggplot(
+        aes(x = Data)
+    ) +
+    geom_point(
+        aes(y = MediaIrraggiamento * (snow_range / irrad_range), color = "Avg. Solar Irradiance"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaIrraggiamento * (snow_range / irrad_range), color = "Avg. Solar Irradiance")
+    ) +
+    geom_point(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth")
+    ) +
+    facet_wrap(
+        . ~ SensorLabel,
+        ncol = 3
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    scale_y_continuous(
+        name = "Snow Depth (cm)",
+        sec.axis = sec_axis(~ . * (irrad_range / snow_range), name = expression("Maximum Solar Irradiance (W/m"^2*")"))
+    ) +
+    scale_color_manual(
+        values = c(
+            "Avg. Snow Depth" = "#756BB1",
+            "Avg. Solar Irradiance" = "#FDAE6B"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+```
+
+## 5.1 By Altitude
+
+Let's plot average monthly snow depth and solar irradiance based on the altitude range:
+
+```{r}
+min_snow <- min(monthly_altitude_data$MediaAltezzaNeve, na.rm = TRUE)
+max_snow <- max(monthly_altitude_data$MediaAltezzaNeve, na.rm = TRUE)
+snow_range <- max_snow - min_snow
+
+min_irrad <- min(monthly_altitude_data$MediaIrraggiamento, na.rm = TRUE)
+max_irrad <- max(monthly_altitude_data$MediaIrraggiamento, na.rm = TRUE)
+irrad_range <- max_irrad - min_irrad
+
+gg_irrad_snow_altitude <- monthly_altitude_data |>
+    ggplot(
+        aes(x = Data)
+    ) +
+    geom_point(
+        aes(y = MediaIrraggiamento * (snow_range / irrad_range), color = "Avg. Solar Irradiance"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaIrraggiamento * (snow_range / irrad_range), color = "Avg. Solar Irradiance")
+    ) +
+    geom_point(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth")
+    ) +
+    geom_line(
+        aes(y = MinAltezzaNeve, color = "Min/Max Snow Depth"),
+        linetype = "dotted"
+    ) +
+    geom_line(
+        aes(y = MaxAltezzaNeve, color = "Min/Max Snow Depth"),
+        linetype = "dotted"
+    ) +
+    facet_wrap(
+        . ~ AltitudeRange,
+        ncol = 3
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    scale_y_continuous(
+        name = "Snow Depth (cm)",
+        sec.axis = sec_axis(~ . * (irrad_range / snow_range), name = expression("Solar Irradiance (W/m"^2*")"))
+    ) +
+    scale_color_manual(
+        values = c(
+            "Avg. Snow Depth" = "#756BB1",
+            "Avg. Solar Irradiance" = "#FDAE6B",
+            "Min/Max Snow Depth" = "#756BB1"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        axis.text.y = element_text(size = 8),
+        legend.text = element_text(size = 12),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+gg_irrad_snow_altitude
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/irrad_snow_altitude.jpg",
+    plot = gg_irrad_snow_altitude,
+    width = 24,
+    height = 8,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+Let's draw a graph plotting temperature and solar irradiance:
+
+```{r}
+min_temp <- min(monthly_altitude_data$MinTemperatura, na.rm = TRUE)
+max_temp <- max(monthly_altitude_data$MaxTemperatura, na.rm = TRUE)
+temp_range <- max_temp - min_temp
+
+min_irrad <- min(monthly_altitude_data$MediaIrraggiamento, na.rm = TRUE)
+max_irrad <- max(monthly_altitude_data$MediaIrraggiamento, na.rm = TRUE)
+irrad_range <- max_irrad - min_irrad
+
+gg_irrad_temp_altitude <- monthly_altitude_data |>
+    ggplot(
+        aes(x = Data)
+    ) +
+    geom_hline(
+        yintercept = 0, 
+        linetype = "dashed", 
+        color = "#F26D6D"
+    ) +
+    geom_point(
+        aes(y = MediaIrraggiamento * (temp_range / irrad_range), color = "Avg. Solar Irradiance"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaIrraggiamento * (temp_range / irrad_range), color = "Avg. Solar Irradiance")
+    ) +
+    geom_point(
+        aes(y = MediaTemperatura, color = "Avg. Temperature"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaTemperatura, color = "Avg. Temperature")
+    ) +
+    geom_line(
+        aes(y = MinTemperatura, color = "Min/Max Temperature"),
+        linetype = "dotted"
+    ) +
+    geom_line(
+        aes(y = MaxTemperatura, color = "Min/Max Temperature"),
+        linetype = "dotted"
+    ) +
+    facet_wrap(
+        . ~ AltitudeRange,
+        ncol = 3
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    scale_y_continuous(
+        name = "Temperature (°C)",
+        sec.axis = sec_axis(~ . * (irrad_range / temp_range), name = expression("Solar Irradiance (W/m"^2*")"))
+    ) +
+    scale_color_manual(
+        values = c(
+            "Avg. Temperature" = "#DE2D26",
+            "Avg. Solar Irradiance" = "#FDAE6B",
+            "Min/Max Temperature" = "#DE2D26"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        axis.text.y = element_text(size = 8),
+        legend.text = element_text(size = 12),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+gg_irrad_temp_altitude
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/irrad_temp_altitude.jpg",
+    plot = gg_irrad_temp_altitude,
+    width = 24,
+    height = 8,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+## 5.2 By Province
+
+Now, let's plot both snow depth and solar irradiance for each province:
+
+```{r}
+min_snow <- min(monthly_province_data$MediaAltezzaNeve, na.rm = TRUE)
+max_snow <- max(monthly_province_data$MediaAltezzaNeve, na.rm = TRUE)
+snow_range <- max_snow - min_snow
+
+min_irrad <- min(monthly_province_data$MediaIrraggiamento, na.rm = TRUE)
+max_irrad <- max(monthly_province_data$MediaIrraggiamento, na.rm = TRUE)
+irrad_range <- max_irrad - min_irrad
+
+monthly_province_data |>
+    ggplot(
+        aes(x = Data)
+    ) +
+    geom_point(
+        aes(y = MediaIrraggiamento * (snow_range / irrad_range), color = "Avg. Solar Irradiance"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaIrraggiamento * (snow_range / irrad_range), color = "Avg. Solar Irradiance")
+    ) +
+    geom_point(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth")
+    ) +
+    geom_line(
+        aes(y = MinAltezzaNeve, color = "Min/Max Snow Depth"),
+        linetype = "dotted"
+    ) +
+    geom_line(
+        aes(y = MaxAltezzaNeve, color = "Min/Max Snow Depth"),
+        linetype = "dotted"
+    ) +
+    facet_wrap(
+        . ~ Provincia,
+        ncol = 3
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    scale_y_continuous(
+        name = "Snow Depth (cm)",
+        sec.axis = sec_axis(~ . * (irrad_range / snow_range), name = expression("Solar Irradiance (W/m"^2*")"))
+    ) +
+    scale_color_manual(
+        values = c(
+            "Avg. Snow Depth" = "#756BB1",
+            "Avg. Solar Irradiance" = "#FDAE6B",
+            "Min/Max Snow Depth" = "#756BB1"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        axis.text.y = element_text(size = 8),
+        legend.text = element_text(size = 12),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+```
+
+Let's draw a graph plotting temperature and solar irradiance:
+
+```{r}
+min_temp <- min(monthly_altitude_data$MinTemperatura, na.rm = TRUE)
+max_temp <- max(monthly_province_data$MaxTemperatura, na.rm = TRUE)
+temp_range <- max_temp - min_temp
+
+min_irrad <- min(monthly_province_data$MediaIrraggiamento, na.rm = TRUE)
+max_irrad <- max(monthly_province_data$MediaIrraggiamento, na.rm = TRUE)
+irrad_range <- max_irrad - min_irrad
+
+monthly_province_data |>
+    ggplot(
+        aes(x = Data)
+    ) +
+    geom_hline(
+        yintercept = 0, 
+        linetype = "dashed", 
+        color = "#F26D6D"
+    ) +
+    geom_point(
+        aes(y = MediaIrraggiamento * (temp_range / irrad_range), color = "Avg. Solar Irradiance"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaIrraggiamento * (temp_range / irrad_range), color = "Avg. Solar Irradiance")
+    ) +
+    geom_point(
+        aes(y = MediaTemperatura, color = "Avg. Temperature"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaTemperatura, color = "Avg. Temperature")
+    ) +
+    geom_line(
+        aes(y = MinTemperatura, color = "Min/Max Temperature"),
+        linetype = "dotted"
+    ) +
+    geom_line(
+        aes(y = MaxTemperatura, color = "Min/Max Temperature"),
+        linetype = "dotted"
+    ) +
+    facet_wrap(
+        . ~ Provincia,
+        ncol = 3
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    scale_y_continuous(
+        name = "Temperature (°C)",
+        sec.axis = sec_axis(~ . * (irrad_range / temp_range), name = expression("Solar Irradiance (W/m"^2*")"))
+    ) +
+    scale_color_manual(
+        values = c(
+            "Avg. Temperature" = "#DE2D26",
+            "Avg. Solar Irradiance" = "#FDAE6B",
+            "Min/Max Temperature" = "#DE2D26"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        axis.text.y = element_text(size = 8),
+        legend.text = element_text(size = 12),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+```
+
+# 6. Relative Humidity
+
+Let's try to plot for reference snow depth and relative humidity on station `1343`, monthly:
+
+```{r}
+min_snow <- min(monthly_station_data$MediaAltezzaNeve, na.rm = TRUE)
+max_snow <- max(monthly_station_data$MediaAltezzaNeve, na.rm = TRUE)
+snow_range <- max_snow - min_snow
+
+min_humid <- min(monthly_station_data$MediaUmidità, na.rm = TRUE)
+max_humid <- max(monthly_station_data$MediaUmidità, na.rm = TRUE)
+humid_range <- max_humid - min_humid
+
+monthly_station_data |>
+    filter(IdStazione == 1343) |>
+    mutate(
+        SensorLabel = paste(IdStazione, " | ", NomeStazione, " (", Quota, "m)", sep = "")
+    ) |>
+    ggplot(
+        aes(x = Data)
+    ) +
+    geom_point(
+        aes(y = MediaUmidità * (snow_range / humid_range), color = "Avg. Humidity"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaUmidità * (snow_range / humid_range), color = "Avg. Humidity")
+    ) +
+    geom_point(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth")
+    ) +
+    facet_wrap(
+        . ~ SensorLabel,
+        ncol = 3
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    scale_y_continuous(
+        name = "Snow Depth (cm)",
+        sec.axis = sec_axis(~ . * (humid_range / snow_range), name = "Humidity (%)")
+    ) +
+    scale_color_manual(
+        values = c(
+            "Avg. Snow Depth" = "#756BB1",
+            "Avg. Humidity" = "#31A354"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+```
+
+Let's draw a climograph to visualize the relationship between relative humidity and precipitation at station:
+
+```{r}
+monthly_station_data_tmp <- monthly_station_data |>
+    filter(IdStazione == 1342)
+
+min_humid <- min(monthly_station_data_tmp$MinUmidità, na.rm = TRUE)
+max_humid <- max(monthly_station_data_tmp$MaxUmidità, na.rm = TRUE)
+humid_range <- max_humid - min_humid
+
+min_prcp <- min(monthly_station_data_tmp$TotPrecipitazione, na.rm = TRUE)
+max_prcp <- max(monthly_station_data_tmp$TotPrecipitazione, na.rm = TRUE)
+prcp_range <- max_prcp - min_prcp
+
+gg_climograph_humidity_lago_reguzzo <- monthly_station_data_tmp |>
+    mutate(
+        SensorLabel = paste(IdStazione, " | ", NomeStazione, " (", Quota, "m)", sep = "")
+    ) |>
+    ggplot(
+        aes(x = MonthLabel)
+    ) +
+    geom_hline(
+        yintercept = 0, 
+        color = "gray20"
+    ) +
+    geom_col(
+        aes(
+            y = TotPrecipitazione * (humid_range / prcp_range),
+            fill = "Tot. Precipitation"
+        ),
+        color = "#3182BD",
+        alpha = 0.7
+    ) +
+    geom_line(
+        aes(y = MediaUmidità, color = "Avg. Humidity", group = 1),
+        size = 1
+    ) +
+    geom_point(
+        aes(y = MediaUmidità, color = "Avg. Humidity"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MinUmidità, color = "Min/Max Humidity", group = 2),
+        linetype = "dotted",
+        size = 1
+    ) +
+    geom_line(
+        aes(y = MaxUmidità, color = "Min/Max Humidity", group = 3),
+        linetype = "dotted",
+        size = 1
+    ) +
+    geom_text(
+        aes(
+            y = TotPrecipitazione * (humid_range / prcp_range),
+            label = round(TotPrecipitazione, digits = 1)
+        ),
+        vjust = -0.5,
+        size = 3.5,
+        color = "#3182BD"
+    ) +
+    facet_wrap(
+        . ~ SensorLabel,
+        ncol = 3
+    ) +
+    scale_y_continuous(
+        name = "Relative Humidity (%)",
+        sec.axis = sec_axis(~ . * (prcp_range / humid_range), name = "Precipitation (mm)")
+    ) +
+    scale_color_manual(
+        values = c(
+            "Avg. Humidity" = "#31A354",
+            "Min/Max Humidity" = "#31A354"
+        )
+    ) +
+    scale_fill_manual(
+        values = c(
+            "Tot. Precipitation" = "#3182BD"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        color = element_blank(),
+        fill = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        axis.text.y = element_text(size = 8),
+        legend.text = element_text(size = 12),
+        axis.title.y.left = element_text(color = "#31A354"),
+        axis.text.y.left = element_text(color = "#31A354"),
+        axis.title.y.right = element_text(color = "#3182BD"),
+        axis.text.y.right = element_text(color = "#3182BD"),
+        panel.grid.major.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+gg_climograph_humidity_lago_reguzzo
+```
+
+```{r, include=FALSE}
+ggsave(
+    filename = "images/climograph_humidity_lago_reguzzo.jpg",
+    plot = gg_temp_snow_lago_reguzzo / gg_climograph_humidity_lago_reguzzo,
+    width = 24,
+    height = 22,
+    dpi = 300,
+    units = "cm"
+)
+```
+
+
+## 6.1 By Altitude
+
+Let's plot average monthly snow depth and relative humidity based on the altitude range:
+
+```{r}
+min_snow <- min(monthly_altitude_data$MediaAltezzaNeve, na.rm = TRUE)
+max_snow <- max(monthly_altitude_data$MediaAltezzaNeve, na.rm = TRUE)
+snow_range <- max_snow - min_snow
+
+min_humid <- min(monthly_altitude_data$MediaUmidità, na.rm = TRUE)
+max_humid <- max(monthly_altitude_data$MediaUmidità, na.rm = TRUE)
+humid_range <- max_humid - min_humid
+
+monthly_altitude_data |>
+    ggplot(
+        aes(x = Data)
+    ) +
+    geom_point(
+        aes(y = MediaUmidità * (snow_range / humid_range), color = "Avg. Relative Humidity"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaUmidità * (snow_range / humid_range), color = "Avg. Relative Humidity")
+    ) +
+    geom_point(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth"),
+        size = 2
+    ) +
+    geom_line(
+        aes(y = MediaAltezzaNeve, color = "Avg. Snow Depth")
+    ) +
+    geom_line(
+        aes(y = MinAltezzaNeve, color = "Min/Max Snow Depth"),
+        linetype = "dotted"
+    ) +
+    geom_line(
+        aes(y = MaxAltezzaNeve, color = "Min/Max Snow Depth"),
+        linetype = "dotted"
+    ) +
+    facet_wrap(
+        . ~ AltitudeRange,
+        ncol = 3
+    ) +
+    scale_x_date(
+        date_breaks = "1 month",
+        labels = scales::label_date_short()
+    ) +
+    scale_y_continuous(
+        name = "Snow Depth (cm)",
+        sec.axis = sec_axis(~ . * (humid_range / snow_range), name = "Relative Humidity (%)")
+    ) +
+    scale_color_manual(
+        values = c(
+            "Avg. Snow Depth" = "#756BB1",
+            "Avg. Relative Humidity" = "#31A354",
+            "Min/Max Snow Depth" = "#756BB1"
+        )
+    ) +
+    labs(
+        x = element_blank(),
+        y = element_blank(),
+        color = element_blank()
+    ) +
+    theme_minimal() +
+    theme(
+        legend.position = "bottom",
+        axis.text.y = element_text(size = 8),
+        legend.text = element_text(size = 12),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+```

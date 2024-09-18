@@ -1,0 +1,14 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Original datasets (too large)
+arpa_dataset/*
+!arpa_dataset/Stazioni_Idro_Nivo_Meteorologiche.csv
+
+# Generated HTML files
+*.nb.html
+
+# Generated images
+images/

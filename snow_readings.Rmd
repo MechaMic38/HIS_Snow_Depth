@@ -1,0 +1,275 @@
+---
+title: "Snow Height Readings"
+output: html_notebook
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+library(sf)
+```
+
+# 1. Imports
+
+Import all snow readings from the `Altezza_neve_dal_01062023_al_01062024.csv` dataset:
+
+```{r}
+snow_readings <- read.csv(
+    "arpa_dataset/Altezza_neve_dal_01062023_al_01062024.csv",
+    header = TRUE,
+    strip.white = TRUE,
+    na.strings = c("-999")
+)
+snow_readings
+```
+
+This won't be fun, since the dataset contains readings from all types of sensors, which means I need to extract only the necessary ones. Let's first import the dataset `Dati_sensori_meteo_01012024_01062024.csv`:
+
+```{r}
+current_data <- read.csv(
+    "arpa_dataset/Dati_sensori_meteo_01012024_01062024.csv",
+    header = TRUE,
+    strip.white = TRUE,
+    na.strings = c("-999")
+)
+```
+
+I also need the elaborated station sensors data:
+
+```{r}
+sensors <- read.csv(
+    "processed_dataset/Stazioni_Idro_Nivo_Meteorologiche.csv",
+    header = TRUE,
+    strip.white = TRUE
+)
+```
+
+Extract the snow height sensors:
+
+```{r}
+snow_sensor_ids <- sensors |>
+    filter(Tipologia == "Altezza Neve") |>
+    pull(IdSensore) |>
+    unique()
+snow_sensor_ids
+```
+
+# 2. Preprocessing
+
+## 2.1 Data cleaning
+
+First of all, let's rename the attribute `idSensore` to `IdSensore`, essential for later when merging:
+
+```{r}
+snow_readings <- snow_readings |>
+    rename(IdSensore = idSensore)
+```
+
+
+Let's see how many of the readings are invalid (NA):
+
+```{r}
+snow_readings |>
+    filter(Stato == "NA") |>
+    count()
+```
+
+Well... FUCK. This could definitely be a problem, 641320 unavailable out of 938773 is a lot.
+Let's try to visualize only the valid ones, and hope there is at least one reading per day by sensor.
+
+```{r}
+snow_readings |> filter(Stato == "VA")
+```
+
+I need to convert of dates of collection from character to usable date times:
+
+```{r}
+snow_readings <- snow_readings |>
+    mutate(Data = dmy_hms(Data))
+```
+
+Now let's try to visualize the number of valid readings by each sensor, and the starting date and ending date of their readings:
+
+```{r}
+snow_readings |>
+    group_by(IdSensore) |>
+    filter(Stato == "VA") |>
+    summarise(
+        min_date = min(Data),
+        max_date = max(Data),
+        valid_readings = n()
+    )
+    
+```
+
+
+Welp... this is interesting! Looks like most sensors only start collecting snow readings during the winter season. It also looks like not all sensors provided readings, since I only get 28 snow height sensors out of 30.
+
+## 2.2 Current Data readings
+
+Filter out only the snow height sensor readings:
+
+```{r}
+snow_current <- current_data |>
+    filter(IdSensore %in% snow_sensor_ids)
+snow_current
+```
+
+Let's repeat the same process as before, convert the datetimes into usable objects, and visualize the number of valid readings by each sensor, and the starting date and ending date of their readings:
+
+```{r}
+snow_current <- snow_current |>
+    mutate(Data = dmy_hms(Data))
+snow_current
+```
+
+```{r}
+snow_current |>
+    group_by(IdSensore) |>
+    filter(Stato == "VA") |>
+    summarise(
+        min_date = min(Data),
+        max_date = max(Data),
+        valid_readings = n()
+    )
+    
+```
+
+It almost seems like that the bigger altitude they have, the more periods they will stay active. Not all sensors are treated the same way, some at lower altitudes are kept in service for longer, probably due to hydro dangers. But one thing is common for all of them: none are active during July and August.
+
+## 2.3 Mergin historic with current
+
+Now let's merge both historic and current snow readings datasets:
+
+```{r}
+snow_merged <- bind_rows(snow_readings, snow_current)
+snow_merged
+```
+
+We need to remove all duplicate instances. Remember that an instance is identified by the reporting sensor, and the time and date of collection.
+
+```{r}
+snow_merged <- snow_merged |>
+    distinct(IdSensore, Data, .keep_all = TRUE)
+snow_merged
+```
+
+## 2.4 Checking for outlier readings
+
+We'd better check for readings that are way off the others, most likely due to sensor malfunctions. Let's plot them first by month:
+
+```{r}
+snow_merged |>
+    filter(Stato == "VA") |>
+    mutate(
+        Month = month(Data, label = TRUE)
+    ) |>
+    ggplot(
+        aes(x = Month, y = Valore)
+    ) +
+    geom_hline(
+        yintercept = 0, 
+        linetype = "dashed", 
+        color = "#F26D6D"
+    ) +
+    geom_boxplot(
+        aes(fill = Month)
+    ) +
+    labs(
+        x = element_blank(), y = "Snow Depth (cm)"
+    ) +
+    scale_fill_brewer(palette = "Blues") +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+```
+
+Then, by altitude range:
+
+```{r}
+snow_merged_altitude <- left_join(
+    snow_merged,
+    sensors |> filter(IdSensore %in% snow_sensor_ids),
+    by = "IdSensore"
+)
+
+snow_merged_altitude$AltitudeRange <- cut(
+    snow_merged_altitude$Quota,
+    breaks = seq(0, 3200, by = 800),
+    labels = c("0-800m", "800-1600m", "1600-2400m", "2400-3200m")
+)
+```
+
+```{r}
+snow_merged_altitude |>
+    filter(Stato == "VA") |>
+    ggplot(
+        aes(x = AltitudeRange, y = Valore)
+    ) +
+    geom_hline(
+        yintercept = 0, 
+        linetype = "dashed", 
+        color = "#F26D6D"
+    ) +
+    geom_boxplot(
+        aes(fill = AltitudeRange)
+    ) +
+    labs(
+        x = element_blank(), y = "Snow Depth (cm)"
+    ) +
+    scale_fill_brewer(palette = "Blues") +
+    theme_minimal() +
+    theme(
+        legend.position = "none",
+        axis.text.y = element_text(size = 8),
+        panel.grid.minor.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.background = element_rect(fill = "gray90", color = "gray90", size = 1)
+    )
+```
+
+All recorded readings seem to be in order, no extreme values.
+
+## 2.5 Computing daily average per sensor
+
+Let's now compute the daily average for each sensor. First, extract the date from `Data`:
+
+```{r}
+snow_daily <- snow_merged |>
+    mutate(Data = floor_date(Data, unit = "day"))
+snow_daily
+```
+
+Then compute the average readings for each sensor within each day:
+
+```{r}
+snow_daily <- snow_daily |>
+    group_by(IdSensore, Data) |>
+    summarise(
+        Media = if (all(is.na(Valore))) -999 else round(mean(Valore, na.rm = TRUE)),
+        Min = if (all(is.na(Valore))) -999 else min(Valore, na.rm = TRUE),
+        Max = if (all(is.na(Valore))) -999 else max(Valore, na.rm = TRUE),
+        .groups = "drop"
+    ) |>
+    mutate(Stato = ifelse(Media == -999, "NA", "VA"))
+snow_daily
+```
+
+## 2.6 Quick inspection and saving
+
+Finally, save the computed snow height daily average in a separate .csv file:
+
+```{r}
+write.csv(
+    snow_daily,
+    file = "processed_dataset/Altezza_neve_dal_01062023_al_01062024.csv",
+    sep = ",",
+    quote = FALSE,
+    row.names = FALSE
+)
+```
+
